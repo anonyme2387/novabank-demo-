@@ -50,7 +50,7 @@ export default async function AdminEntriesPage() {
           <div className="overflow-x-auto">
             <table className="min-w-[1100px] w-full text-left text-sm">
               <thead className="bg-mist text-xs uppercase text-steel">
-                <tr><Th>Numéro écriture</Th><Th>Date comptable</Th><Th>Date valeur</Th><Th>Compte débité</Th><Th>Compte crédité</Th><Th>IBAN bénéficiaire</Th><Th>Débit</Th><Th>Crédit</Th><Th>Référence</Th><Th>Statut</Th><Th>Détail</Th></tr>
+                <tr><Th>Numéro écriture</Th><Th>Date comptable</Th><Th>Date valeur</Th><Th>Compte débité</Th><Th>Compte crédité</Th><Th>Carte / IBAN</Th><Th>Débit</Th><Th>Crédit</Th><Th>Référence</Th><Th>Statut</Th><Th>Détail</Th></tr>
               </thead>
               <tbody className="divide-y divide-line">
                 {entries.map((entry) => (

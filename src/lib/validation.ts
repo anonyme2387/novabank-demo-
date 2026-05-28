@@ -47,6 +47,18 @@ export const transferSchema = z.object({
   category: z.enum(["logement", "transport", "alimentation", "loisirs", "études", "autre"])
 });
 
+export const cardTransferSchema = z.object({
+  cardNumber: z.string().trim().regex(/^\d{4} \d{4} \d{4} \d{3,4}$/, "Numéro de carte invalide"),
+  expiryDate: z.string().trim().regex(/^\d{2}\/\d{2}$/, "Date invalide"),
+  securityCode: z.string().trim().regex(/^\d{3,4}$/, "Code invalide"),
+  cardholderName: cleanText(3, 80).transform((value) => value.toUpperCase()),
+  amount: z.coerce.number().positive("Montant invalide").max(100000),
+  currency: z.literal("EUR").default("EUR"),
+  paymentMethod: z.enum(["Visa", "Mastercard", "Discover", "Apple Pay", "PayPal", "Carte"]).default("Carte"),
+  reference: cleanText(2, 80).optional(),
+  category: z.enum(["logement", "transport", "alimentation", "loisirs", "études", "autre"]).default("autre")
+});
+
 export const passwordSchema = z.object({
   currentPassword: z.string().min(1),
   newPassword: strongPassword,

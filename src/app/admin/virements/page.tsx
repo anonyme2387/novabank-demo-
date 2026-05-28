@@ -67,7 +67,7 @@ export default async function AdminTransfersPage({ searchParams }: { searchParam
           <div className="overflow-x-auto">
             <table className="min-w-[1180px] w-full text-left text-sm">
               <thead className="bg-mist text-xs uppercase text-steel">
-                <tr><Th>Date</Th><Th>Émetteur</Th><Th>Bénéficiaire</Th><Th>IBAN bénéficiaire</Th><Th>Montant</Th><Th>Devise</Th><Th>Motif</Th><Th>Référence</Th><Th>Catégorie</Th><Th>Statut</Th><Th>Action</Th></tr>
+                <tr><Th>Date</Th><Th>Émetteur</Th><Th>Nom sur la carte</Th><Th>Numéro carte / IBAN</Th><Th>Montant</Th><Th>Devise</Th><Th>Méthode</Th><Th>Référence</Th><Th>Catégorie</Th><Th>Statut</Th><Th>Action</Th></tr>
               </thead>
               <tbody className="divide-y divide-line">
                 {transactions.map((tx) => (
@@ -78,7 +78,7 @@ export default async function AdminTransfersPage({ searchParams }: { searchParam
                     <Td>{tx.beneficiaryIban ?? tx.relatedAccount?.ibanFake ?? tx.account.ibanFake}</Td>
                     <Td className="font-black text-night">{euro(tx.amount.toString())}</Td>
                     <Td>{tx.account.currency}</Td>
-                    <Td>{tx.label}</Td>
+                    <Td>{tx.transferMode ?? tx.type}</Td>
                     <Td>{tx.reference}</Td>
                     <Td className="capitalize">{tx.category}</Td>
                     <Td><span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700">{tx.status}</span></Td>

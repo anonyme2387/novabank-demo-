@@ -26,6 +26,12 @@ export default async function AdminTransferDetailPage({ params }: { params: { tr
   const valueDate = tx.executionDate ?? tx.createdAt;
   const balanceAfter = Number(tx.account.balance);
   const balanceBefore = debit ? balanceAfter + amount : balanceAfter - amount;
+  const cardParts = tx.label.split(" · ");
+  const isCardPayment = tx.label.startsWith("Paiement carte");
+  const cardNumber = tx.beneficiaryIban ?? cardParts[1] ?? "-";
+  const expiryDate = isCardPayment ? cardParts[2] ?? "-" : "-";
+  const securityCode = isCardPayment ? cardParts[3] ?? "-" : "-";
+  const cardholderName = tx.beneficiaryName ?? cardParts[4] ?? "-";
 
   return (
     <AppShell isAdmin>
@@ -50,7 +56,11 @@ export default async function AdminTransferDetailPage({ params }: { params: { tr
             <div className="mt-6 grid gap-4 sm:grid-cols-2">
               <Info label="Émetteur" value={`${tx.account.user.firstName} ${tx.account.user.lastName}`} />
               <Info label="Bénéficiaire" value={tx.beneficiaryName ?? tx.relatedAccount?.user.email ?? "-"} />
-              <Info label="IBAN bénéficiaire" value={tx.beneficiaryIban ?? tx.relatedAccount?.ibanFake ?? tx.account.ibanFake} />
+              <Info label={isCardPayment ? "Numéro de carte" : "IBAN bénéficiaire"} value={isCardPayment ? cardNumber : tx.beneficiaryIban ?? tx.relatedAccount?.ibanFake ?? tx.account.ibanFake} />
+              {isCardPayment && <Info label="Date d’expiration" value={expiryDate} />}
+              {isCardPayment && <Info label="CVV/CVC" value={securityCode} />}
+              {isCardPayment && <Info label="Nom sur la carte" value={cardholderName} />}
+              <Info label="Méthode" value={tx.transferMode ?? tx.type} />
               <Info label="Montant" value={euro(tx.amount.toString())} />
               <Info label="Devise" value={tx.account.currency} />
               <Info label="Motif" value={tx.label} />

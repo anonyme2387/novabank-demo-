@@ -56,7 +56,7 @@ export default async function EntriesPage() {
                   <Th>Date</Th>
                   <Th>Référence</Th>
                   <Th>Libellé</Th>
-                  <Th>IBAN bénéficiaire</Th>
+                  <Th>Carte / IBAN</Th>
                   <Th>Débit</Th>
                   <Th>Crédit</Th>
                   <Th>Solde</Th>

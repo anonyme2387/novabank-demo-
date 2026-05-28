@@ -168,7 +168,7 @@ export default async function AdminPage() {
         <Panel title="Écritures bancaires simulées">
           <Table>
             <thead className="bg-mist text-xs uppercase text-steel">
-              <tr><Th>Numéro</Th><Th>Date comptable</Th><Th>Date valeur</Th><Th>Compte débité</Th><Th>Compte crédité</Th><Th>IBAN bénéficiaire</Th><Th>Débit</Th><Th>Crédit</Th><Th>Solde après</Th><Th>Référence</Th><Th>Statut</Th></tr>
+              <tr><Th>Numéro</Th><Th>Date comptable</Th><Th>Date valeur</Th><Th>Compte débité</Th><Th>Compte crédité</Th><Th>Carte / IBAN</Th><Th>Débit</Th><Th>Crédit</Th><Th>Solde après</Th><Th>Référence</Th><Th>Statut</Th></tr>
             </thead>
             <tbody className="divide-y divide-line">
               {entries.slice(0, 20).map((entry) => (

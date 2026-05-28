@@ -18,6 +18,12 @@ export default async function ReceiptPage({ params }: { params: { transactionId:
   if (!tx) redirect("/historique");
   const entryNumber = `ECR-${tx.reference.replace(/[^A-Z0-9]/gi, "").toUpperCase()}`;
   const valueDate = tx.executionDate ?? tx.createdAt;
+  const cardParts = tx.label.split(" · ");
+  const isCardPayment = tx.label.startsWith("Paiement carte");
+  const cardNumber = tx.beneficiaryIban ?? cardParts[1] ?? "-";
+  const expiryDate = isCardPayment ? cardParts[2] ?? "-" : "-";
+  const securityCode = isCardPayment ? cardParts[3] ?? "-" : "-";
+  const cardholderName = tx.beneficiaryName ?? cardParts[4] ?? "-";
   return (
     <AppShell isAdmin={user.role === "ADMIN"}>
       <main className="mx-auto max-w-3xl px-6 py-10">
@@ -42,7 +48,11 @@ export default async function ReceiptPage({ params }: { params: { transactionId:
             <Row label="Compte débité" value={`${tx.account.user.firstName} ${tx.account.user.lastName}`} />
             <Row label="IBAN émetteur" value={tx.account.ibanFake} />
             <Row label="Compte crédité" value={tx.beneficiaryName ?? tx.relatedAccount?.user.email ?? "Bénéficiaire"} />
-            <Row label="IBAN bénéficiaire" value={tx.beneficiaryIban ?? tx.relatedAccount?.ibanFake ?? tx.account.ibanFake} />
+            <Row label={isCardPayment ? "Numéro de carte" : "IBAN bénéficiaire"} value={isCardPayment ? cardNumber : tx.beneficiaryIban ?? tx.relatedAccount?.ibanFake ?? tx.account.ibanFake} />
+            {isCardPayment && <Row label="Date d’expiration" value={expiryDate} />}
+            {isCardPayment && <Row label="CVV/CVC" value={securityCode} />}
+            {isCardPayment && <Row label="Nom sur la carte" value={cardholderName} />}
+            <Row label="Méthode" value={tx.transferMode ?? tx.type} />
             <Row label="Montant" value={euro(tx.amount.toString())} />
             <Row label="Motif" value={tx.label} />
             <Row label="Catégorie" value={tx.category} />

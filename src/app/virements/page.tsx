@@ -13,8 +13,8 @@ export default async function TransfersPage() {
       <div className="mx-auto max-w-4xl px-6 py-8">
         <div className="text-center">
           <p className="font-semibold text-steel">Opération sécurisée</p>
-          <h1 className="mt-2 text-4xl font-black text-night">Envoyer de l’argent</h1>
-          <p className="mx-auto mt-3 max-w-2xl text-steel">Créez un virement avec contrôle du solde, récapitulatif, écriture bancaire et reçu associé.</p>
+          <h1 className="mt-2 text-4xl font-black text-night">Virement par carte</h1>
+          <p className="mx-auto mt-3 max-w-2xl text-steel">Validez un paiement carte avec contrôle du solde, écriture bancaire et reçu professionnel.</p>
         </div>
         <div className="mt-8"><TransferForm /></div>
       </div>
