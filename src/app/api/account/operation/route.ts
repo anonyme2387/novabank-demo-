@@ -7,7 +7,7 @@ import { prisma } from "@/lib/prisma";
 
 export async function POST(req: Request) {
   try {
-    if (!sameOrigin(req)) return fail("Requête refusée", 403);
+    if (!sameOrigin(req)) return fail("Connexion impossible pour le moment", 403);
     const user = await requireUser();
     if (!user?.account) return fail("Non authentifié", 401);
     if (user.account.status === "BLOCKED") return fail("Compte bloqué", 403);

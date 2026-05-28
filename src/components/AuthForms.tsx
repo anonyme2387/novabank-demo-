@@ -47,16 +47,21 @@ export function AuthForm({ mode }: { mode: Mode }) {
             turnstileToken: token
           }
         : { email: data.get("email"), password: data.get("password"), turnstileToken: token };
-    const res = await fetch(`/api/auth/${mode === "register" ? "register" : "login"}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
-    const json = await res.json();
-    setLoading(false);
-    if (!res.ok) return setError(json.error ?? "Erreur");
-    router.push(json.role === "ADMIN" ? "/admin" : "/dashboard");
-    router.refresh();
+    try {
+      const res = await fetch(`/api/auth/${mode === "register" ? "register" : "login"}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      const json = await res.json();
+      setLoading(false);
+      if (!res.ok) return setError(json.error ?? (mode === "login" ? "Connexion impossible pour le moment" : "Erreur"));
+      router.push(json.role === "ADMIN" ? "/admin" : "/dashboard");
+      router.refresh();
+    } catch {
+      setLoading(false);
+      setError(mode === "login" ? "Connexion impossible pour le moment" : "Erreur");
+    }
   }
 
   return (

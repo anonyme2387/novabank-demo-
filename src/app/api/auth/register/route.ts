@@ -11,12 +11,12 @@ import { registerSchema } from "@/lib/validation";
 
 export async function POST(req: NextRequest) {
   try {
-    if (!sameOrigin(req)) return fail("Requête refusée", 403);
+    if (!sameOrigin(req)) return fail("Connexion impossible pour le moment", 403);
     const ip = getIp(req);
     const limited = rateLimit(`register:${ip}`, 6);
     if (!limited.ok) return fail("Trop de tentatives. Réessayez plus tard.", 429);
     const input = registerSchema.parse(await req.json());
-    if (!(await verifyTurnstile(input.turnstileToken, ip))) return fail("CAPTCHA invalide", 403);
+    if (!(await verifyTurnstile(input.turnstileToken, ip))) return fail("Connexion impossible pour le moment", 403);
 
     const exists = await prisma.user.findUnique({ where: { email: input.email } });
     if (exists) return fail("Un compte existe déjà avec cet email", 409);

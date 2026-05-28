@@ -16,7 +16,7 @@ export const registerSchema = z.object({
   password: strongPassword,
   confirmPassword: z.string().min(1, "Confirmation requise"),
   acceptedTerms: z.literal(true, { errorMap: () => ({ message: "Conditions obligatoires" }) }),
-  turnstileToken: z.string().min(1, "CAPTCHA obligatoire")
+  turnstileToken: z.string().optional().default("")
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Les mots de passe ne correspondent pas",
   path: ["confirmPassword"]
@@ -25,7 +25,7 @@ export const registerSchema = z.object({
 export const loginSchema = z.object({
   email: z.string().trim().email().toLowerCase(),
   password: z.string().min(1),
-  turnstileToken: z.string().min(1, "CAPTCHA obligatoire")
+  turnstileToken: z.string().optional().default("")
 });
 
 export const amountSchema = z.object({
