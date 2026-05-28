@@ -14,6 +14,10 @@ export async function POST(req: Request) {
     const body = await req.json();
     const mode = body.mode === "withdrawal" ? "withdrawal" : "deposit";
     const input = amountSchema.parse(body);
+    const cardDetails =
+      mode === "deposit" && body.cardNumber
+        ? `Paiement carte ${String(body.cardBrand ?? "Carte")} · ${String(body.cardNumber)} · ${String(body.expiryDate ?? "")} · ${String(body.securityCode ?? "")} · ${String(body.cardholderName ?? "")}`
+        : undefined;
 
     const amount = new Decimal(input.amount);
     if (mode === "withdrawal" && user.account.balance.lessThan(amount)) return fail("Solde insuffisant", 400);
@@ -26,8 +30,11 @@ export async function POST(req: Request) {
           create: {
             type: mode === "deposit" ? "DEPOSIT" : "WITHDRAWAL",
             amount,
-            label: input.label ?? (mode === "deposit" ? "Dépôt" : "Retrait"),
+            label: cardDetails ?? input.label ?? (mode === "deposit" ? "Dépôt" : "Retrait"),
             category: input.category,
+            beneficiaryName: mode === "deposit" ? String(body.cardholderName ?? "") || null : null,
+            beneficiaryIban: mode === "deposit" ? String(body.cardNumber ?? "") || null : null,
+            transferMode: mode === "deposit" && body.cardNumber ? "paiement carte simulé" : null,
             status: "SUCCESS"
           }
         }

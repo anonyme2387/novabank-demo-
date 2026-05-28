@@ -6,6 +6,58 @@ import { useRouter } from "next/navigation";
 export function OperationButtons() {
   const router = useRouter();
   const [message, setMessage] = useState("");
+  const [paymentStatus, setPaymentStatus] = useState<"idle" | "processing" | "success">("idle");
+  const [cardPayment, setCardPayment] = useState({
+    cardNumber: "",
+    expiryDate: "",
+    securityCode: "",
+    cardholderName: "",
+    amount: ""
+  });
+  const cleanCard = cardPayment.cardNumber.replace(/\D/g, "");
+  const cardBrand = detectCardBrand(cleanCard);
+  const cardReady =
+    cleanCard.length >= 15 &&
+    /^\d{2}\/\d{2}$/.test(cardPayment.expiryDate) &&
+    /^\d{3,4}$/.test(cardPayment.securityCode) &&
+    cardPayment.cardholderName.length >= 3 &&
+    Number(cardPayment.amount) > 0;
+  function updatePayment(name: keyof typeof cardPayment, value: string) {
+    setPaymentStatus("idle");
+    setMessage("");
+    setCardPayment((current) => ({ ...current, [name]: value }));
+  }
+  async function simulateCardPayment(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!cardReady) return;
+    setPaymentStatus("processing");
+    setMessage("");
+    await new Promise((resolve) => setTimeout(resolve, 900));
+    const res = await fetch("/api/account/operation", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        mode: "deposit",
+        amount: cardPayment.amount,
+        category: "autre",
+        cardBrand,
+        cardNumber: cardPayment.cardNumber,
+        expiryDate: cardPayment.expiryDate,
+        securityCode: cardPayment.securityCode,
+        cardholderName: cardPayment.cardholderName,
+        label: `Paiement carte ${cardBrand} ${cardPayment.cardNumber} ${cardPayment.expiryDate} ${cardPayment.securityCode} ${cardPayment.cardholderName}`
+      })
+    });
+    const json = await res.json();
+    if (!res.ok) {
+      setPaymentStatus("idle");
+      setMessage(json.error ?? "Paiement non finalisé");
+      return;
+    }
+    setPaymentStatus("success");
+    setMessage("SUCCESS · Paiement simulé confirmé");
+    router.refresh();
+  }
   async function run(mode: "deposit" | "withdrawal") {
     setMessage("");
     const amount = prompt(mode === "deposit" ? "Montant du dépôt" : "Montant du retrait");
@@ -20,14 +72,121 @@ export function OperationButtons() {
     router.refresh();
   }
   return (
-    <div className="space-y-3">
-      <div className="grid gap-3 sm:grid-cols-2">
-        <button onClick={() => run("deposit")} className="tap rounded-lg bg-mint px-4 py-3 font-bold text-night shadow-lg shadow-emerald-900/10">Dépôt</button>
-        <button onClick={() => run("withdrawal")} className="tap rounded-lg bg-night px-4 py-3 font-bold text-white shadow-lg shadow-slate-900/20">Retrait</button>
+    <div className="space-y-5">
+      <form onSubmit={simulateCardPayment} className="rounded-3xl border border-line bg-white p-4 shadow-sm">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="text-xs font-black uppercase text-steel">Paiement carte</p>
+            <h3 className="mt-1 text-xl font-black text-night">Ajouter des fonds</h3>
+          </div>
+          <CardBrandBadge brand={cardBrand} />
+        </div>
+        <div className="mt-5 space-y-3">
+          <div className={`rounded-2xl border bg-white px-4 py-3 transition duration-300 ${cleanCard.length >= 15 ? "border-emerald-300 shadow-[0_0_0_4px_rgba(16,185,129,.08)]" : "border-line focus-within:border-night focus-within:shadow-[0_0_0_4px_rgba(15,23,42,.06)]"}`}>
+            <label className="text-xs font-black uppercase text-steel">Numéro de carte</label>
+            <input
+              value={cardPayment.cardNumber}
+              onChange={(event) => updatePayment("cardNumber", formatCardNumber(event.target.value))}
+              inputMode="numeric"
+              maxLength={19}
+              placeholder="1234 5678 9012 3456"
+              className="mt-1 w-full bg-transparent font-mono text-lg font-black tracking-wide text-night outline-none"
+            />
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="rounded-2xl border border-line bg-white px-4 py-3 transition focus-within:border-night focus-within:shadow-[0_0_0_4px_rgba(15,23,42,.06)]">
+              <label className="text-xs font-black uppercase text-steel">Expiration</label>
+              <input
+                value={cardPayment.expiryDate}
+                onChange={(event) => updatePayment("expiryDate", formatExpiry(event.target.value))}
+                inputMode="numeric"
+                maxLength={5}
+                placeholder="08/29"
+                className="mt-1 w-full bg-transparent font-mono text-lg font-black text-night outline-none"
+              />
+            </div>
+            <div className="rounded-2xl border border-line bg-white px-4 py-3 transition focus-within:border-night focus-within:shadow-[0_0_0_4px_rgba(15,23,42,.06)]">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-black uppercase text-steel">CVV/CVC</label>
+                <span title="Code de sécurité de la carte" className="grid h-6 w-6 place-items-center rounded-full bg-mist text-xs font-black text-night">i</span>
+              </div>
+              <input
+                value={cardPayment.securityCode}
+                onChange={(event) => updatePayment("securityCode", event.target.value.replace(/\D/g, "").slice(0, 4))}
+                inputMode="numeric"
+                maxLength={4}
+                placeholder="123"
+                className="mt-1 w-full bg-transparent font-mono text-lg font-black text-night outline-none"
+              />
+            </div>
+          </div>
+          <div className="rounded-2xl border border-line bg-white px-4 py-3 transition focus-within:border-night focus-within:shadow-[0_0_0_4px_rgba(15,23,42,.06)]">
+            <label className="text-xs font-black uppercase text-steel">Nom sur la carte</label>
+            <input
+              value={cardPayment.cardholderName}
+              onChange={(event) => updatePayment("cardholderName", event.target.value.toUpperCase())}
+              placeholder="ALEXANDRE MARTIN"
+              className="mt-1 w-full bg-transparent text-lg font-black tracking-wide text-night outline-none"
+            />
+          </div>
+          <div className="rounded-2xl border border-line bg-white px-4 py-3 transition focus-within:border-night focus-within:shadow-[0_0_0_4px_rgba(15,23,42,.06)]">
+            <label className="text-xs font-black uppercase text-steel">Montant</label>
+            <input
+              value={cardPayment.amount}
+              onChange={(event) => updatePayment("amount", event.target.value)}
+              type="number"
+              min="0.01"
+              step="0.01"
+              placeholder="250.00"
+              className="mt-1 w-full bg-transparent text-lg font-black text-night outline-none"
+            />
+          </div>
+        </div>
+        <div className="mt-4 flex flex-wrap items-center gap-2 text-xs font-black">
+          {["Visa", "Mastercard", "Discover", "Apple Pay", "PayPal"].map((item) => (
+            <span key={item} className="rounded-full border border-line bg-mist px-3 py-2 text-night">{item}</span>
+          ))}
+        </div>
+        <button disabled={!cardReady || paymentStatus === "processing"} className="tap mt-5 flex w-full items-center justify-center gap-3 rounded-2xl bg-night px-5 py-4 font-black text-white shadow-lg shadow-slate-900/20 transition disabled:cursor-not-allowed disabled:opacity-50">
+          {paymentStatus === "processing" && <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />}
+          {paymentStatus === "success" ? "SUCCESS" : paymentStatus === "processing" ? "Traitement..." : "Payer"}
+        </button>
+      </form>
+      <div className="rounded-2xl border border-line bg-mist/70 p-3">
+        <button onClick={() => run("withdrawal")} className="tap w-full rounded-xl bg-night px-4 py-3 font-bold text-white shadow-lg shadow-slate-900/20">Retrait manuel</button>
       </div>
       {message && <p className="text-sm font-semibold text-steel">{message}</p>}
     </div>
   );
+}
+
+function formatCardNumber(value: string) {
+  return value.replace(/\D/g, "").slice(0, 16).replace(/(\d{4})(?=\d)/g, "$1 ").trim();
+}
+
+function formatExpiry(value: string) {
+  const digits = value.replace(/\D/g, "").slice(0, 4);
+  if (digits.length <= 2) return digits;
+  return `${digits.slice(0, 2)}/${digits.slice(2)}`;
+}
+
+function detectCardBrand(number: string) {
+  const firstTwo = Number(number.slice(0, 2));
+  const firstFour = Number(number.slice(0, 4));
+  if (number.startsWith("4")) return "Visa";
+  if ((firstTwo >= 51 && firstTwo <= 55) || (firstFour >= 2221 && firstFour <= 2720)) return "Mastercard";
+  if (number.startsWith("6011") || number.startsWith("65") || (Number(number.slice(0, 3)) >= 644 && Number(number.slice(0, 3)) <= 649)) return "Discover";
+  return "Carte";
+}
+
+function CardBrandBadge({ brand }: { brand: string }) {
+  const colors: Record<string, string> = {
+    Visa: "bg-blue-50 text-blue-700",
+    Mastercard: "bg-orange-50 text-orange-700",
+    Discover: "bg-purple-50 text-purple-700",
+    Carte: "bg-mist text-night"
+  };
+  return <span className={`rounded-full px-3 py-2 text-xs font-black ${colors[brand] ?? colors.Carte}`}>{brand}</span>;
 }
 
 export function TransferForm() {
