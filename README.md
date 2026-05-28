@@ -22,10 +22,10 @@ Important : aucun argent réel, aucun paiement réel, aucun service bancaire ré
 
 Le seed Prisma crée :
 
-- Admin : `admin@novabank.demo`
-- Mot de passe : `Admin123!`
-- Utilisateurs fictifs : `alice@novabank.demo` et `yanis@novabank.demo`
-- Mot de passe utilisateurs : `Demo123!`
+- Admin : `admin@novabank-app.com`
+- Mot de passe admin : `NovaAdmin#Ultra2026!`
+- Utilisateur : `alexandre.martin@novabank-app.com`
+- Mot de passe utilisateur : `NovaSecure#2026`
 
 ## Installation locale
 
@@ -46,7 +46,7 @@ TURNSTILE_SECRET_KEY=
 NEXT_PUBLIC_TURNSTILE_SITE_KEY=
 ```
 
-En développement, si les clés Turnstile ne sont pas définies, un jeton de démonstration local est utilisé. En production, configurez les clés Cloudflare Turnstile.
+Si les clés Turnstile ne sont pas définies, la connexion reste disponible. En production, configurez les clés Cloudflare Turnstile pour activer la protection CAPTCHA.
 
 ## Scripts
 
@@ -68,7 +68,7 @@ npx prisma db seed
    - `TURNSTILE_SECRET_KEY`
    - `NEXT_PUBLIC_TURNSTILE_SITE_KEY`
 5. Déployer depuis le repo GitHub `novabank-demo`.
-6. Lancer les migrations :
+6. Les migrations sont lancées automatiquement au démarrage Railway via `npm run railway:start`. Pour initialiser les données manuellement :
 
 ```bash
 npx prisma migrate deploy
@@ -79,7 +79,7 @@ Le build Railway utilise :
 
 ```bash
 npm run build
-npm run start
+npm run railway:start
 ```
 
 ## Confidentialité
