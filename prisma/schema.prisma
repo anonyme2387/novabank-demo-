@@ -1,0 +1,96 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum AccountStatus {
+  ACTIVE
+  BLOCKED
+}
+
+enum CardStatus {
+  ACTIVE
+  FROZEN
+}
+
+enum TransactionType {
+  DEPOSIT
+  WITHDRAWAL
+  TRANSFER_IN
+  TRANSFER_OUT
+}
+
+enum TransactionStatus {
+  SUCCESS
+  PENDING
+  FAILED
+}
+
+model User {
+  id           String     @id @default(cuid())
+  firstName    String
+  lastName     String
+  email        String     @unique
+  passwordHash String
+  role         Role       @default(USER)
+  createdAt    DateTime   @default(now())
+  account      Account?
+  loginLogs    LoginLog[]
+}
+
+model Account {
+  id           String        @id @default(cuid())
+  userId       String        @unique
+  ibanFake     String        @unique
+  balance      Decimal       @default(1000.00) @db.Decimal(12, 2)
+  currency     String        @default("EUR")
+  status       AccountStatus @default(ACTIVE)
+  createdAt    DateTime      @default(now())
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  card         VirtualCard?
+  transactions Transaction[] @relation("AccountTransactions")
+  relatedTxs   Transaction[] @relation("RelatedAccountTransactions")
+}
+
+model VirtualCard {
+  id             String     @id @default(cuid())
+  accountId      String     @unique
+  cardNumberFake String
+  expiryDate     String
+  cvvFake        String
+  status         CardStatus @default(ACTIVE)
+  account        Account    @relation(fields: [accountId], references: [id], onDelete: Cascade)
+}
+
+model Transaction {
+  id               String            @id @default(cuid())
+  accountId        String
+  relatedAccountId String?
+  type             TransactionType
+  amount           Decimal           @db.Decimal(12, 2)
+  label            String
+  status           TransactionStatus @default(SUCCESS)
+  createdAt        DateTime          @default(now())
+  account          Account           @relation("AccountTransactions", fields: [accountId], references: [id], onDelete: Cascade)
+  relatedAccount   Account?          @relation("RelatedAccountTransactions", fields: [relatedAccountId], references: [id])
+}
+
+model LoginLog {
+  id        String   @id @default(cuid())
+  userId    String
+  ipAddress String
+  country   String
+  browser   String
+  device    String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
