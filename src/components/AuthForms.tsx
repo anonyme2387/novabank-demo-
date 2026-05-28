@@ -12,6 +12,15 @@ export function AuthForm({ mode }: { mode: Mode }) {
   const [token, setToken] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const demos = [
+    ["Alexandre", "alexandre.martin@novabank.test", "NovaBank2026!"],
+    ["Clara", "clara.dubois@novabank.test", "NovaBank2026!"],
+    ["Yanis", "yanis.benali@novabank.test", "NovaBank2026!"],
+    ["Admin", "admin@novabank.demo", "Admin123!"]
+  ];
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -25,6 +34,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
             lastName: data.get("lastName"),
             email: data.get("email"),
             password: data.get("password"),
+            confirmPassword: data.get("confirmPassword"),
             acceptedTerms: data.get("acceptedTerms") === "on",
             turnstileToken: token
           }
@@ -49,8 +59,36 @@ export function AuthForm({ mode }: { mode: Mode }) {
           <input name="lastName" required placeholder="Nom" className="rounded-lg border border-line px-4 py-3" />
         </div>
       )}
-      <input name="email" required type="email" placeholder="Email" className="w-full rounded-lg border border-line px-4 py-3" />
-      <input name="password" required type="password" placeholder="Mot de passe" className="w-full rounded-lg border border-line px-4 py-3" />
+      {mode === "login" && (
+        <div className="rounded-2xl bg-mist p-4">
+          <p className="mb-3 text-sm font-black text-night">Comptes de présentation</p>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {demos.map(([label, demoEmail, demoPassword]) => (
+              <button
+                key={demoEmail}
+                type="button"
+                onClick={() => {
+                  setEmail(demoEmail);
+                  setPassword(demoPassword);
+                }}
+                className="tap rounded-lg bg-white px-3 py-2 text-left text-xs font-bold text-night shadow-sm"
+              >
+                Se connecter comme {label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+      <input name="email" value={email} onChange={(event) => setEmail(event.target.value)} required type="email" placeholder="Email" className="w-full rounded-lg border border-line px-4 py-3" />
+      <input name="password" value={password} onChange={(event) => setPassword(event.target.value)} required type="password" placeholder="Mot de passe" className="w-full rounded-lg border border-line px-4 py-3" />
+      {mode === "register" && (
+        <input name="confirmPassword" required type="password" placeholder="Confirmer le mot de passe" className="w-full rounded-lg border border-line px-4 py-3" />
+      )}
+      {mode === "register" && (
+        <p className="rounded-xl bg-mist px-4 py-3 text-xs font-semibold leading-5 text-steel">
+          Minimum 10 caractères avec majuscule, minuscule, chiffre et caractère spécial.
+        </p>
+      )}
       {mode === "register" && (
         <label className="flex gap-3 text-sm text-steel">
           <input name="acceptedTerms" type="checkbox" required className="mt-1" />

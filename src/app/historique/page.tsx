@@ -28,7 +28,10 @@ export default async function HistoryPage({ searchParams }: { searchParams: { ty
               <div><p className="font-black text-night">{tx.label}</p><p className="text-sm text-steel">{new Intl.DateTimeFormat("fr-FR", { dateStyle: "medium", timeStyle: "short" }).format(tx.createdAt)}</p></div>
               <span className="font-semibold text-steel">{tx.type}</span>
               <span className="text-right font-black">{euro(tx.amount.toString())}</span>
-              <span className="rounded-full bg-mist px-3 py-1 text-xs font-bold text-steel md:col-start-2">{tx.status === "SUCCESS" ? "réussi" : tx.status === "PENDING" ? "en attente" : "refusé"}</span>
+              <div className="flex gap-2 md:col-start-2">
+                <span className="rounded-full bg-mist px-3 py-1 text-xs font-bold text-steel">{tx.status === "SUCCESS" ? "réussi" : tx.status === "PENDING" ? "en attente" : "refusé"}</span>
+                <Link href={`/recu/${tx.id}`} className="rounded-full bg-night px-3 py-1 text-xs font-bold text-white">Reçu</Link>
+              </div>
             </div>
           ))}
         </div>

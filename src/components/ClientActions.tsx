@@ -33,25 +33,103 @@ export function OperationButtons() {
 export function TransferForm() {
   const router = useRouter();
   const [message, setMessage] = useState("");
+  const [step, setStep] = useState<"form" | "review" | "success">("form");
+  const [payload, setPayload] = useState<Record<string, FormDataEntryValue | string> | null>(null);
+  const [receipt, setReceipt] = useState<Record<string, string> | null>(null);
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
+    const nextPayload = {
+      beneficiary: form.get("beneficiary") ?? "",
+      recipient: form.get("recipient") ?? "",
+      iban: form.get("iban") ?? "",
+      amount: form.get("amount") ?? "",
+      label: form.get("label") ?? "",
+      reference: form.get("reference") ?? "",
+      executionDate: form.get("executionDate") ?? "",
+      mode: form.get("mode") ?? "immédiat",
+      category: form.get("category") ?? "autre"
+    };
+    setPayload(nextPayload);
+    setStep("review");
+  }
+  async function confirm() {
+    if (!payload) return;
     const res = await fetch("/api/transfer", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ recipient: form.get("recipient"), amount: form.get("amount"), label: form.get("label") || "Virement" })
+      body: JSON.stringify(payload)
     });
     const json = await res.json();
-    setMessage(res.ok ? "Virement envoyé." : json.error);
-    if (res.ok) event.currentTarget.reset();
+    if (!res.ok) {
+      setMessage(json.error);
+      setStep("form");
+      return;
+    }
+    setReceipt(json.receipt);
+    setStep("success");
     router.refresh();
+  }
+  if (step === "review" && payload) {
+    return (
+      <div className="premium-panel space-y-5 rounded-2xl p-6">
+        <h2 className="text-2xl font-black text-night">Récapitulatif du virement</h2>
+        <div className="grid gap-3 text-sm">
+          {Object.entries(payload).map(([key, value]) => (
+            <div key={key} className="flex justify-between rounded-xl bg-white px-4 py-3">
+              <span className="font-semibold text-steel">{key}</span>
+              <span className="font-black text-night">{String(value)}</span>
+            </div>
+          ))}
+        </div>
+        <div className="flex gap-3">
+          <button onClick={() => setStep("form")} className="rounded-lg bg-white px-5 py-3 font-black text-night">Modifier</button>
+          <button onClick={confirm} className="rounded-lg bg-night px-5 py-3 font-black text-white">Confirmer le virement</button>
+        </div>
+      </div>
+    );
+  }
+  if (step === "success" && receipt) {
+    return (
+      <div className="rounded-2xl bg-white p-6 shadow-premium">
+        <div className="mb-6 flex items-center justify-between">
+          <h2 className="text-2xl font-black text-night">Virement exécuté</h2>
+          <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700">Réussi</span>
+        </div>
+        <div className="rounded-2xl border border-line p-5">
+          <p className="text-xl font-black text-night">NovaBank</p>
+          <p className="mt-1 text-xs text-steel">Document généré automatiquement</p>
+          <div className="mt-5 grid gap-3 text-sm">
+            {Object.entries(receipt).map(([key, value]) => (
+              <div key={key} className="flex justify-between border-b border-line pb-2">
+                <span className="font-semibold text-steel">{key}</span>
+                <span className="font-black text-night">{String(value)}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        <button onClick={() => { setStep("form"); setPayload(null); setReceipt(null); }} className="mt-5 rounded-lg bg-night px-5 py-3 font-black text-white">Nouveau virement</button>
+      </div>
+    );
   }
   return (
     <form onSubmit={submit} className="premium-panel space-y-4 rounded-2xl p-6">
-      <input name="recipient" required placeholder="Email ou IBAN du destinataire" className="w-full rounded-lg border border-line px-4 py-3 outline-none transition focus:border-night focus:ring-4 focus:ring-slate-900/5" />
+      <div className="grid gap-4 md:grid-cols-2">
+        <input name="beneficiary" required placeholder="Bénéficiaire" className="rounded-lg border border-line px-4 py-3 outline-none transition focus:border-night focus:ring-4 focus:ring-slate-900/5" />
+        <input name="recipient" required placeholder="Email du bénéficiaire" className="rounded-lg border border-line px-4 py-3 outline-none transition focus:border-night focus:ring-4 focus:ring-slate-900/5" />
+      </div>
+      <input name="iban" required placeholder="IBAN" className="w-full rounded-lg border border-line px-4 py-3 uppercase outline-none transition focus:border-night focus:ring-4 focus:ring-slate-900/5" />
       <input name="amount" required type="number" min="0.01" step="0.01" placeholder="Montant" className="w-full rounded-lg border border-line px-4 py-3 outline-none transition focus:border-night focus:ring-4 focus:ring-slate-900/5" />
-      <input name="label" placeholder="Libellé" className="w-full rounded-lg border border-line px-4 py-3" />
-      <button className="tap w-full rounded-lg bg-night px-5 py-3 font-bold text-white shadow-lg shadow-slate-900/20">Envoyer le virement</button>
+      <div className="grid gap-4 md:grid-cols-2">
+        <input name="label" required placeholder="Motif du virement" className="rounded-lg border border-line px-4 py-3" />
+        <input name="reference" required placeholder="Référence" className="rounded-lg border border-line px-4 py-3" />
+      </div>
+      <div className="grid gap-4 md:grid-cols-3">
+        <input name="executionDate" required type="date" defaultValue={new Date().toISOString().slice(0, 10)} className="rounded-lg border border-line px-4 py-3" />
+        <select name="mode" className="rounded-lg border border-line px-4 py-3"><option>immédiat</option><option>programmé</option></select>
+        <select name="category" className="rounded-lg border border-line px-4 py-3"><option>logement</option><option>transport</option><option>alimentation</option><option>loisirs</option><option>études</option><option>autre</option></select>
+      </div>
+      <button className="tap w-full rounded-lg bg-night px-5 py-3 font-bold text-white shadow-lg shadow-slate-900/20">Continuer</button>
       {message && <p className="text-sm font-semibold text-steel">{message}</p>}
     </form>
   );
@@ -81,7 +159,7 @@ export function PasswordForm() {
     const res = await fetch("/api/profile/password", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ currentPassword: form.get("currentPassword"), newPassword: form.get("newPassword") })
+      body: JSON.stringify({ currentPassword: form.get("currentPassword"), newPassword: form.get("newPassword"), confirmPassword: form.get("confirmPassword") })
     });
     const json = await res.json();
     setMessage(res.ok ? "Mot de passe modifié." : json.error);
@@ -90,6 +168,7 @@ export function PasswordForm() {
     <form onSubmit={submit} className="space-y-3">
       <input name="currentPassword" type="password" placeholder="Mot de passe actuel" className="w-full rounded-lg border border-line px-4 py-3" />
       <input name="newPassword" type="password" placeholder="Nouveau mot de passe" className="w-full rounded-lg border border-line px-4 py-3" />
+      <input name="confirmPassword" type="password" placeholder="Confirmer le nouveau mot de passe" className="w-full rounded-lg border border-line px-4 py-3" />
       <button className="rounded-lg bg-night px-5 py-3 font-bold text-white">Changer le mot de passe</button>
       {message && <p className="text-sm font-semibold text-steel">{message}</p>}
     </form>

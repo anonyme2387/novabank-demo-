@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Logo } from "@/components/Logo";
+import { AutoLogout } from "@/components/SecurityClient";
 
 const nav = [
   ["Accueil", "/dashboard"],
@@ -11,6 +12,7 @@ const nav = [
 export function AppShell({ children, isAdmin = false }: { children: React.ReactNode; isAdmin?: boolean }) {
   return (
     <div className="min-h-screen bg-mist pb-24 md:pb-0">
+      <AutoLogout />
       <aside className="fixed left-0 top-0 hidden h-screen w-72 border-r border-line bg-white px-6 py-6 md:block">
         <Logo />
         <nav className="mt-10 space-y-2">

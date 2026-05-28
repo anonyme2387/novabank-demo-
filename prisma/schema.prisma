@@ -78,6 +78,12 @@ model Transaction {
   type             TransactionType
   amount           Decimal           @db.Decimal(12, 2)
   label            String
+  category         String            @default("autre")
+  reference        String            @unique @default(cuid())
+  beneficiaryName  String?
+  beneficiaryIban  String?
+  executionDate    DateTime?
+  transferMode     String?
   status           TransactionStatus @default(SUCCESS)
   createdAt        DateTime          @default(now())
   account          Account           @relation("AccountTransactions", fields: [accountId], references: [id], onDelete: Cascade)

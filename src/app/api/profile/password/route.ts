@@ -1,10 +1,12 @@
 import { requireUser } from "@/lib/auth";
 import { fail, handleError, ok } from "@/lib/api";
 import { prisma } from "@/lib/prisma";
+import { sameOrigin } from "@/lib/security";
 import { passwordSchema } from "@/lib/validation";
 
 export async function POST(req: Request) {
   try {
+    if (!sameOrigin(req)) return fail("Requête refusée", 403);
     const user = await requireUser();
     if (!user) return fail("Non authentifié", 401);
     const input = passwordSchema.parse(await req.json());

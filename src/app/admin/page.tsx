@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 export default async function AdminPage() {
   const admin = await requireAdmin();
   if (!admin) redirect("/dashboard");
-  const users = await prisma.user.findMany({ include: { account: true }, orderBy: { createdAt: "desc" } });
+  const users = await prisma.user.findMany({ include: { account: { include: { transactions: { orderBy: { createdAt: "desc" }, take: 5 } } } }, orderBy: { createdAt: "desc" } });
   const logs = await prisma.loginLog.findMany({ include: { user: true }, orderBy: { createdAt: "desc" }, take: 20 });
   return (
     <AppShell isAdmin>
@@ -37,6 +37,24 @@ export default async function AdminPage() {
             {logs.map((log) => (
               <div key={log.id} className="grid gap-2 py-3 text-sm md:grid-cols-[1fr_140px_160px_180px]">
                 <span className="font-bold">{log.user.email}</span><span>{log.ipAddress}</span><span>{log.country}</span><span>{log.browser} · {log.device}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="mt-8 rounded-2xl bg-white p-6 shadow-sm">
+          <h2 className="text-xl font-black">Données de présentation</h2>
+          <div className="mt-4 grid gap-4">
+            {users.map((user) => (
+              <div key={user.id} className="rounded-xl bg-mist p-4">
+                <p className="font-black text-night">{user.firstName} {user.lastName} · {user.email}</p>
+                <p className="mt-1 text-sm font-semibold text-steel">IBAN {user.account?.ibanFake ?? "-"} · {user.account ? euro(user.account.balance.toString()) : "-"}</p>
+                <div className="mt-3 grid gap-2">
+                  {user.account?.transactions.map((tx) => (
+                    <div key={tx.id} className="flex justify-between rounded-lg bg-white px-3 py-2 text-sm">
+                      <span>{tx.label} · {tx.category}</span><span className="font-black">{euro(tx.amount.toString())}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             ))}
           </div>

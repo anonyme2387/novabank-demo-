@@ -4,11 +4,13 @@ import { createSession } from "@/lib/auth";
 import { fail, handleError, ok } from "@/lib/api";
 import { getApproxCountry, getClientInfo, getIp, maskIp } from "@/lib/request-info";
 import { rateLimit } from "@/lib/rate-limit";
+import { sameOrigin } from "@/lib/security";
 import { verifyTurnstile } from "@/lib/turnstile";
 import { loginSchema } from "@/lib/validation";
 
 export async function POST(req: NextRequest) {
   try {
+    if (!sameOrigin(req)) return fail("Requête refusée", 403);
     const ip = getIp(req);
     const input = loginSchema.parse(await req.json());
     const limited = rateLimit(`login:${input.email}:${ip}`, 5, 10 * 60_000, 15 * 60_000);

@@ -13,8 +13,15 @@ export default async function DashboardPage() {
   const user = await requireUser();
   if (!user?.account) redirect("/connexion");
   const transactions = await prisma.transaction.findMany({ where: { accountId: user.account.id }, orderBy: { createdAt: "desc" }, take: 5 });
+  const monthTransactions = await prisma.transaction.findMany({ where: { accountId: user.account.id }, orderBy: { createdAt: "desc" }, take: 50 });
   const income = transactions.filter((t) => t.type === "DEPOSIT" || t.type === "TRANSFER_IN").reduce((sum, t) => sum + Number(t.amount), 0);
   const out = transactions.filter((t) => t.type === "WITHDRAWAL" || t.type === "TRANSFER_OUT").reduce((sum, t) => sum + Number(t.amount), 0);
+  const monthIncome = monthTransactions.filter((t) => t.type === "DEPOSIT" || t.type === "TRANSFER_IN").reduce((sum, t) => sum + Number(t.amount), 0);
+  const monthOut = monthTransactions.filter((t) => t.type === "WITHDRAWAL" || t.type === "TRANSFER_OUT").reduce((sum, t) => sum + Number(t.amount), 0);
+  const categories = ["logement", "transport", "alimentation", "loisirs", "études", "autre"].map((category) => ({
+    category,
+    amount: monthTransactions.filter((t) => t.category === category && (t.type === "WITHDRAWAL" || t.type === "TRANSFER_OUT")).reduce((sum, t) => sum + Number(t.amount), 0)
+  }));
 
   return (
     <AppShell isAdmin={user.role === "ADMIN"}>
@@ -30,21 +37,42 @@ export default async function DashboardPage() {
           <section className="grid gap-6">
             <div className="premium-panel rounded-2xl p-6">
               <p className="text-sm font-bold text-steel">Solde disponible</p>
-              <div className="mt-3 text-5xl font-black text-night">{euro(user.account.balance.toString())}</div>
+              <div className="sensitive mt-3 text-5xl font-black text-night">{euro(user.account.balance.toString())}</div>
               <div className="mt-6 grid gap-4 sm:grid-cols-3">
-                <Stat label="Entrées récentes" value={euro(income)} />
-                <Stat label="Sorties récentes" value={euro(out)} />
+                <Stat label="Revenus du mois" value={euro(monthIncome)} />
+                <Stat label="Dépenses du mois" value={euro(monthOut)} />
                 <Stat label="Statut" value={user.account.status === "ACTIVE" ? "Actif" : "Bloqué"} />
               </div>
             </div>
             <BalanceChart />
+            <div className="grid gap-6 lg:grid-cols-2">
+              <div className="rounded-2xl bg-white p-6 shadow-sm">
+                <h2 className="text-xl font-black text-night">Dépenses par catégorie</h2>
+                <div className="mt-5 space-y-4">
+                  {categories.map((item) => (
+                    <div key={item.category}>
+                      <div className="flex justify-between text-sm font-bold"><span className="capitalize text-steel">{item.category}</span><span>{euro(item.amount)}</span></div>
+                      <div className="mt-2 h-2 rounded-full bg-mist"><div className="h-2 rounded-full bg-night" style={{ width: `${Math.min(100, (item.amount / Math.max(1, monthOut)) * 100)}%` }} /></div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="rounded-2xl bg-white p-6 shadow-sm">
+                <h2 className="text-xl font-black text-night">Objectifs et notifications</h2>
+                <div className="mt-5 space-y-3 text-sm">
+                  <div className="rounded-xl bg-mist p-4"><b>Limite mensuelle</b><br />Objectif: {euro(1800)} · utilisé: {euro(monthOut)}</div>
+                  <div className="rounded-xl bg-mist p-4"><b>Objectif épargne</b><br />Vacances: 68% atteint</div>
+                  <div className="rounded-xl bg-emerald-50 p-4 text-emerald-800"><b>Notification</b><br />Aucune activité inhabituelle détectée.</div>
+                </div>
+              </div>
+            </div>
             <div className="rounded-2xl bg-white p-6 shadow-sm">
               <h2 className="text-xl font-black text-night">Dernières transactions</h2>
               <div className="mt-4 divide-y divide-line">
                 {transactions.map((tx) => (
                   <div key={tx.id} className="flex items-center justify-between py-4">
-                    <div><p className="font-bold">{tx.label}</p><p className="text-sm text-steel">{tx.type} · {tx.status}</p></div>
-                    <span className="font-black">{euro(tx.amount.toString())}</span>
+                    <div><p className="font-bold">{tx.label}</p><p className="text-sm text-steel">{tx.category} · {tx.status}</p></div>
+                    <span className="sensitive font-black">{euro(tx.amount.toString())}</span>
                   </div>
                 ))}
               </div>

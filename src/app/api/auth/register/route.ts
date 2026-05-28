@@ -5,11 +5,13 @@ import { fail, handleError, ok } from "@/lib/api";
 import { makeExpiryDate, makeFakeCardNumber, makeFakeIban } from "@/lib/banking";
 import { getIp } from "@/lib/request-info";
 import { rateLimit } from "@/lib/rate-limit";
+import { sameOrigin } from "@/lib/security";
 import { verifyTurnstile } from "@/lib/turnstile";
 import { registerSchema } from "@/lib/validation";
 
 export async function POST(req: NextRequest) {
   try {
+    if (!sameOrigin(req)) return fail("Requête refusée", 403);
     const ip = getIp(req);
     const limited = rateLimit(`register:${ip}`, 6);
     if (!limited.ok) return fail("Trop de tentatives. Réessayez plus tard.", 429);
@@ -23,8 +25,8 @@ export async function POST(req: NextRequest) {
     const passwordHash = await bcrypt.hash(input.password, 12);
     const user = await prisma.user.create({
       data: {
-        firstName: input.firstName,
-        lastName: input.lastName,
+        firstName: input.firstName.replace(/[<>]/g, ""),
+        lastName: input.lastName.replace(/[<>]/g, ""),
         email: input.email,
         passwordHash,
         account: {
@@ -39,7 +41,7 @@ export async function POST(req: NextRequest) {
               }
             },
             transactions: {
-              create: { type: "DEPOSIT", amount: "1000.00", label: "Dépôt initial", status: "SUCCESS" }
+              create: { type: "DEPOSIT", amount: "1000.00", label: "Dépôt initial", category: "autre", status: "SUCCESS" }
             }
           }
         }
