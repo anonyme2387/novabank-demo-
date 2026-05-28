@@ -69,7 +69,7 @@ export function AuthForm({ mode, initialError = "" }: { mode: Mode; initialError
       <div className="relative">
         <input name="password" value={password} onChange={(event) => setPassword(event.target.value)} required type={showPassword ? "text" : "password"} placeholder="Mot de passe" className="w-full rounded-xl border border-line bg-white/90 px-4 py-3 pr-28 outline-none transition focus:border-night focus:ring-4 focus:ring-slate-900/10" />
         <button type="button" onClick={() => setShowPassword((value) => !value)} className="absolute right-2 top-2 rounded-lg bg-mist px-3 py-2 text-xs font-black text-night transition hover:bg-slate-200">
-          {showPassword ? "Masquer" : "Afficher"}
+          {showPassword ? "Cacher" : "Afficher"}
         </button>
       </div>
       {mode === "register" && (

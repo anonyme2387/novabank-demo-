@@ -16,7 +16,7 @@ export default async function ReceiptPage({ params }: { params: { transactionId:
     include: { account: { include: { user: true } }, relatedAccount: { include: { user: true } } }
   });
   if (!tx) redirect("/historique");
-  const entryNumber = `ECR-${tx.reference.replace(/[^A-Z0-9]/gi, "").slice(0, 12).toUpperCase()}`;
+  const entryNumber = `ECR-${tx.reference.replace(/[^A-Z0-9]/gi, "").toUpperCase()}`;
   const valueDate = tx.executionDate ?? tx.createdAt;
   return (
     <AppShell isAdmin={user.role === "ADMIN"}>

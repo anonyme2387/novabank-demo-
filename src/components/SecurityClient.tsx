@@ -24,18 +24,6 @@ export function AutoLogout() {
   return null;
 }
 
-export function PrivacyToggle() {
-  const [enabled, setEnabled] = useState(false);
-  useEffect(() => {
-    document.documentElement.classList.toggle("privacy-mode", enabled);
-  }, [enabled]);
-  return (
-    <button onClick={() => setEnabled((value) => !value)} className="rounded-lg bg-mist px-4 py-3 text-sm font-black text-night">
-      {enabled ? "Désactiver le mode confidentialité" : "Activer le mode confidentialité"}
-    </button>
-  );
-}
-
 export function SuspiciousActivityButton() {
   const [sent, setSent] = useState(false);
   return (

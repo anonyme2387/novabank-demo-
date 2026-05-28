@@ -133,7 +133,7 @@ export default async function AdminPage() {
                   <Td className="font-black">{euro(account.balance.toString())}</Td>
                   <Td>{account.currency}</Td>
                   <Td><Badge tone={account.status === "ACTIVE" ? "green" : "red"}>{account.status}</Badge></Td>
-                  <Td>{maskCard(account.card?.cardNumberFake)}</Td>
+                  <Td>{account.card?.cardNumberFake ?? "-"}</Td>
                   <Td><AdminAccountActions accountId={account.id} status={account.status} /></Td>
                 </tr>
               ))}
@@ -193,7 +193,7 @@ export default async function AdminPage() {
         <Panel title="Logs de connexion">
           <Table>
             <thead className="bg-mist text-xs uppercase text-steel">
-              <tr><Th>Utilisateur</Th><Th>Date</Th><Th>IP masquée</Th><Th>Pays</Th><Th>Navigateur</Th><Th>Appareil</Th></tr>
+              <tr><Th>Utilisateur</Th><Th>Date</Th><Th>IP</Th><Th>Pays</Th><Th>Navigateur</Th><Th>Appareil</Th></tr>
             </thead>
             <tbody className="divide-y divide-line">
               {logs.map((log) => (
@@ -226,7 +226,7 @@ function buildEntries(transactions: Array<any>) {
     running.set(accountId, balanceAfter);
     return {
       id: tx.id,
-      number: `ECR-${tx.reference.replace(/[^A-Z0-9]/gi, "").slice(0, 10).toUpperCase()}`,
+      number: `ECR-${tx.reference.replace(/[^A-Z0-9]/gi, "").toUpperCase()}`,
       createdAt: tx.createdAt,
       valueDate: tx.executionDate ?? tx.createdAt,
       debited: debit ? `${tx.account.user.firstName} ${tx.account.user.lastName}` : "-",
@@ -273,12 +273,6 @@ function Badge({ children, tone }: { children: React.ReactNode; tone: "green" | 
     night: "bg-night text-white"
   };
   return <span className={`rounded-full px-3 py-1 text-xs font-black ${styles[tone]}`}>{children}</span>;
-}
-
-function maskCard(card?: string | null) {
-  if (!card) return "-";
-  const compact = card.replace(/\s+/g, "");
-  return `•••• •••• •••• ${compact.slice(-4)}`;
 }
 
 function formatDate(date: Date) {

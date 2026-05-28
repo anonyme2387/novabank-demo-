@@ -85,7 +85,7 @@ export async function POST(req: Request) {
         date: executionDate,
         status: "SUCCESS",
         reference,
-        entryNumber: `ECR-${reference.replace(/[^A-Z0-9]/gi, "").slice(0, 12).toUpperCase()}`,
+        entryNumber: `ECR-${reference.replace(/[^A-Z0-9]/gi, "").toUpperCase()}`,
         valueDate: executionDate,
         debitedAccount: `${user.firstName} ${user.lastName}`,
         creditedAccount: input.beneficiary,

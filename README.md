@@ -13,7 +13,7 @@ Important : aucun argent réel, aucun paiement réel, aucun service bancaire ré
 - Dashboard avec solde, statistiques, transactions, IBAN et carte réaliste
 - Dépôts, retraits et virements fictifs entre utilisateurs
 - Historique filtrable par type de transaction
-- Profil avec dernière connexion, IP masquée, pays approximatif, navigateur et appareil
+- Profil avec dernière connexion, IP, pays approximatif, navigateur et appareil
 - Panel admin réservé au rôle `ADMIN`
 - Middleware de protection des pages privées
 - Headers de sécurité et validation backend
@@ -84,4 +84,4 @@ npm run railway:start
 
 ## Confidentialité
 
-NovaBank ne demande jamais d’adresse réelle, de GPS, de ville précise ou de données de paiement réelles. Les logs de connexion conservent seulement l’IP masquée, le pays approximatif, le navigateur, l’appareil et la date afin de sécuriser les comptes fictifs et limiter les abus.
+NovaBank ne demande jamais d’adresse réelle, de GPS, de ville précise ou de données de paiement réelles. Les logs de connexion conservent l’IP de connexion, le pays approximatif, le navigateur, l’appareil et la date afin de sécuriser les comptes fictifs et limiter les abus.

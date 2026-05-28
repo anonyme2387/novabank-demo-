@@ -23,7 +23,7 @@ export default async function AdminEntriesPage() {
     const credit = debit ? 0 : amount;
     return {
       id: tx.id,
-      number: `ECR-${tx.reference.replace(/[^A-Z0-9]/gi, "").slice(0, 10).toUpperCase()}`,
+      number: `ECR-${tx.reference.replace(/[^A-Z0-9]/gi, "").toUpperCase()}`,
       accountingDate: tx.createdAt,
       valueDate: tx.executionDate ?? tx.createdAt,
       debited: debit ? `${tx.account.user.firstName} ${tx.account.user.lastName}` : "-",

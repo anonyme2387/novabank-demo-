@@ -22,7 +22,7 @@ export default async function AdminTransferDetailPage({ params }: { params: { tr
   const amount = Number(tx.amount);
   const debit = debitTypes.has(tx.type) ? amount : 0;
   const credit = debit ? 0 : amount;
-  const entryNumber = `ECR-${tx.reference.replace(/[^A-Z0-9]/gi, "").slice(0, 12).toUpperCase()}`;
+  const entryNumber = `ECR-${tx.reference.replace(/[^A-Z0-9]/gi, "").toUpperCase()}`;
   const valueDate = tx.executionDate ?? tx.createdAt;
   const balanceAfter = Number(tx.account.balance);
   const balanceBefore = debit ? balanceAfter + amount : balanceAfter - amount;

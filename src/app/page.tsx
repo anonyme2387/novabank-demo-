@@ -117,7 +117,7 @@ export default function Home() {
                       <span>Premium</span>
                     </div>
                     <div className="mt-10 h-10 w-14 rounded-lg bg-gradient-to-br from-amber-200 via-yellow-500 to-amber-700 shadow-lg" />
-                    <div className="mt-7 font-mono text-lg tracking-wide">4975 9200 •••• 1890</div>
+                    <div className="mt-7 font-mono text-lg tracking-wide">4975 9200 1842 1890</div>
                     <div className="mt-5 flex justify-between text-xs uppercase text-white/60">
                       <span>Carte active</span>
                       <span>12/29</span>

@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { AppShell } from "@/components/AppShell";
 import { LogoutButton, PasswordForm } from "@/components/ClientActions";
-import { PrivacyToggle, SuspiciousActivityButton } from "@/components/SecurityClient";
+import { SuspiciousActivityButton } from "@/components/SecurityClient";
 import { requireUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
@@ -53,7 +53,7 @@ export default async function ProfilePage() {
           <section className="rounded-2xl bg-white p-6 shadow-sm md:col-span-2">
             <h2 className="mb-4 text-xl font-black">Paramètres de sécurité</h2>
             <PasswordForm />
-            <div className="mt-6 flex flex-wrap gap-3"><PrivacyToggle /><SuspiciousActivityButton /><button className="rounded-lg bg-mist px-4 py-3 text-sm font-black text-night">Télécharger le relevé mensuel</button><LogoutButton /></div>
+            <div className="mt-6 flex flex-wrap gap-3"><SuspiciousActivityButton /><button className="rounded-lg bg-mist px-4 py-3 text-sm font-black text-night">Télécharger le relevé mensuel</button><LogoutButton /></div>
           </section>
         </div>
       </div>

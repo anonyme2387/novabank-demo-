@@ -7,12 +7,6 @@ export function getIp(req: NextRequest) {
   return forwarded || req.headers.get("x-real-ip") || "0.0.0.0";
 }
 
-export function maskIp(ip: string) {
-  if (ip.includes(":")) return `${ip.split(":").slice(0, 3).join(":")}:xxxx`;
-  const parts = ip.split(".");
-  return parts.length === 4 ? `${parts[0]}.${parts[1]}.${parts[2]}.xxx` : "xxx.xxx.xxx.xxx";
-}
-
 export function getClientInfo(req: NextRequest) {
   const parser = new UAParser(req.headers.get("user-agent") ?? "");
   const browser = parser.getBrowser().name ?? "Navigateur inconnu";

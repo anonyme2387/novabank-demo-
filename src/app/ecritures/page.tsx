@@ -40,7 +40,7 @@ export default async function EntriesPage() {
             <h1 className="mt-1 text-4xl font-black text-night">Écritures bancaires</h1>
           </div>
           <div className="rounded-2xl bg-white px-5 py-3 text-sm font-bold text-steel shadow-sm">
-            Solde disponible: <span className="sensitive text-night">{euro(account.balance.toString())}</span>
+            Solde disponible: <span className="text-night">{euro(account.balance.toString())}</span>
           </div>
         </div>
 
@@ -72,7 +72,7 @@ export default async function EntriesPage() {
                       <span className="block text-xs text-steel">Valeur: {new Intl.DateTimeFormat("fr-FR", { day: "2-digit", month: "short", year: "numeric" }).format(tx.executionDate ?? tx.createdAt)}</span>
                     </Td>
                     <Td>
-                      <span className="font-black text-night">ECR-{tx.reference.replace(/[^A-Z0-9]/gi, "").slice(0, 10).toUpperCase()}</span>
+                      <span className="font-black text-night">ECR-{tx.reference.replace(/[^A-Z0-9]/gi, "").toUpperCase()}</span>
                       <span className="block text-xs text-steel">{tx.reference}</span>
                     </Td>
                     <Td>
@@ -82,7 +82,7 @@ export default async function EntriesPage() {
                     <Td>{tx.beneficiaryIban ?? tx.relatedAccount?.ibanFake ?? account.ibanFake}</Td>
                     <Td className="font-black text-red-600">{debit ? euro(debit) : "-"}</Td>
                     <Td className="font-black text-emerald-700">{credit ? euro(credit) : "-"}</Td>
-                    <Td className="sensitive font-black text-night">{euro(balanceAfter)}</Td>
+                    <Td className="font-black text-night">{euro(balanceAfter)}</Td>
                     <Td><span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700">{tx.status}</span></Td>
                     <Td><Link href={`/recu/${tx.id}`} className="font-black text-night underline underline-offset-4">Voir</Link></Td>
                   </tr>

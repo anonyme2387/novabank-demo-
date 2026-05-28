@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { createSession } from "@/lib/auth";
 import { fail, handleError, ok } from "@/lib/api";
 import { ensureDemoAccount } from "@/lib/demo-accounts";
-import { getApproxCountry, getClientInfo, getIp, maskIp } from "@/lib/request-info";
+import { getApproxCountry, getClientInfo, getIp } from "@/lib/request-info";
 import { rateLimit } from "@/lib/rate-limit";
 import { sameOrigin } from "@/lib/security";
 import { verifyTurnstile } from "@/lib/turnstile";
@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
     const input = loginSchema.parse(await req.json());
     const limited = rateLimit(`login:${input.email}:${ip}`, 5, 10 * 60_000, 15 * 60_000);
     if (!limited.ok) {
-      console.error("[NovaBank][auth] Rate limit login", { email: input.email, ip: maskIp(ip) });
+      console.error("[NovaBank][auth] Rate limit login", { email: input.email, ip });
       return fail("Service momentanément indisponible", 429);
     }
     if (!(await verifyTurnstile(input.turnstileToken, ip))) {
@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
     await prisma.loginLog.create({
       data: {
         userId: user.id,
-        ipAddress: maskIp(ip),
+        ipAddress: ip,
         country: await getApproxCountry(ip),
         browser,
         device
