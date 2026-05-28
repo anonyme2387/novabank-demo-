@@ -36,14 +36,30 @@ export function TransferForm() {
   const [step, setStep] = useState<"form" | "review" | "processing" | "success">("form");
   const [payload, setPayload] = useState<Record<string, FormDataEntryValue | string> | null>(null);
   const [receipt, setReceipt] = useState<Record<string, string> | null>(null);
+  const [formState, setFormState] = useState({
+    beneficiary: "",
+    iban: "",
+    amount: "",
+    currency: "EUR",
+    reference: "",
+    label: "",
+    category: "autre",
+    executionDate: new Date().toISOString().slice(0, 10),
+    mode: "immédiat"
+  });
+  const formReady = Boolean(formState.beneficiary && formState.iban && formState.amount && formState.reference && formState.label && formState.executionDate);
+  function updateField(name: keyof typeof formState, value: string) {
+    setFormState((current) => ({ ...current, [name]: value }));
+  }
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
     const nextPayload = {
       beneficiary: form.get("beneficiary") ?? "",
-      recipient: form.get("recipient") ?? "",
+      recipient: form.get("iban") ?? "",
       iban: form.get("iban") ?? "",
       amount: form.get("amount") ?? "",
+      currency: form.get("currency") ?? "EUR",
       label: form.get("label") ?? "",
       reference: form.get("reference") ?? "",
       executionDate: form.get("executionDate") ?? "",
@@ -77,7 +93,7 @@ export function TransferForm() {
       <div className="premium-panel rounded-2xl p-6">
         <h2 className="text-2xl font-black text-night">Traitement en cours</h2>
         <div className="mt-6 space-y-3">
-          {["Analyse de l’opération", "Vérification du solde", "Génération de l’écriture", "Transaction validée"].map((item, index) => (
+          {["Analyse de l’opération", "Vérification du solde", "Génération de l’écriture bancaire", "Virement confirmé"].map((item, index) => (
             <div key={item} className="flex items-center gap-3 rounded-xl bg-white p-4">
               <span className="h-3 w-3 animate-pulse rounded-full bg-mint" style={{ animationDelay: `${index * 150}ms` }} />
               <span className="font-black text-night">{item}</span>
@@ -92,7 +108,7 @@ export function TransferForm() {
       <div className="premium-panel space-y-5 rounded-2xl p-6">
         <h2 className="text-2xl font-black text-night">Récapitulatif du virement</h2>
         <div className="grid gap-3 text-sm">
-          {Object.entries(payload).map(([key, value]) => (
+          {Object.entries(payload).filter(([key]) => key !== "recipient").map(([key, value]) => (
             <div key={key} className="flex justify-between rounded-xl bg-white px-4 py-3">
               <span className="font-semibold text-steel">{key}</span>
               <span className="font-black text-night">{String(value)}</span>
@@ -130,23 +146,29 @@ export function TransferForm() {
     );
   }
   return (
-    <form onSubmit={submit} className="premium-panel space-y-4 rounded-2xl p-6">
-      <div className="grid gap-4 md:grid-cols-2">
-        <input name="beneficiary" required placeholder="Bénéficiaire" className="rounded-lg border border-line px-4 py-3 outline-none transition focus:border-night focus:ring-4 focus:ring-slate-900/5" />
-        <input name="recipient" required placeholder="Email du bénéficiaire" className="rounded-lg border border-line px-4 py-3 outline-none transition focus:border-night focus:ring-4 focus:ring-slate-900/5" />
+    <form onSubmit={submit} className="premium-panel mx-auto max-w-3xl space-y-5 rounded-3xl p-6 md:p-8">
+      <div>
+        <h2 className="text-2xl font-black text-night">Envoyer de l’argent</h2>
+        <p className="mt-1 text-sm font-semibold text-steel">Préparez l’opération, puis vérifiez le récapitulatif avant validation.</p>
       </div>
-      <input name="iban" required placeholder="IBAN" className="w-full rounded-lg border border-line px-4 py-3 uppercase outline-none transition focus:border-night focus:ring-4 focus:ring-slate-900/5" />
-      <input name="amount" required type="number" min="0.01" step="0.01" placeholder="Montant" className="w-full rounded-lg border border-line px-4 py-3 outline-none transition focus:border-night focus:ring-4 focus:ring-slate-900/5" />
       <div className="grid gap-4 md:grid-cols-2">
-        <input name="label" required placeholder="Motif du virement" className="rounded-lg border border-line px-4 py-3" />
-        <input name="reference" required placeholder="Référence" className="rounded-lg border border-line px-4 py-3" />
+        <input name="beneficiary" value={formState.beneficiary} onChange={(event) => updateField("beneficiary", event.target.value)} required placeholder="Jean Martin" className="rounded-xl border border-line bg-white px-4 py-3 outline-none transition focus:border-night focus:ring-4 focus:ring-slate-900/10" />
+        <input name="iban" value={formState.iban} onChange={(event) => updateField("iban", event.target.value.toUpperCase())} required placeholder="FR76 XXXX XXXX XXXX XXXX XXXX XXX" className="rounded-xl border border-line bg-white px-4 py-3 uppercase outline-none transition focus:border-night focus:ring-4 focus:ring-slate-900/10" />
+      </div>
+      <div className="grid gap-4 md:grid-cols-[1fr_140px]">
+        <input name="amount" value={formState.amount} onChange={(event) => updateField("amount", event.target.value)} required type="number" min="0.01" step="0.01" placeholder="250.00" className="rounded-xl border border-line bg-white px-4 py-3 outline-none transition focus:border-night focus:ring-4 focus:ring-slate-900/10" />
+        <select name="currency" value={formState.currency} onChange={(event) => updateField("currency", event.target.value)} className="rounded-xl border border-line bg-white px-4 py-3"><option>EUR</option></select>
+      </div>
+      <div className="grid gap-4 md:grid-cols-2">
+        <input name="reference" value={formState.reference} onChange={(event) => updateField("reference", event.target.value)} required placeholder="Facture #12345" className="rounded-xl border border-line bg-white px-4 py-3 outline-none transition focus:border-night focus:ring-4 focus:ring-slate-900/10" />
+        <input name="label" value={formState.label} onChange={(event) => updateField("label", event.target.value)} required placeholder="Motif du virement" className="rounded-xl border border-line bg-white px-4 py-3 outline-none transition focus:border-night focus:ring-4 focus:ring-slate-900/10" />
       </div>
       <div className="grid gap-4 md:grid-cols-3">
-        <input name="executionDate" required type="date" defaultValue={new Date().toISOString().slice(0, 10)} className="rounded-lg border border-line px-4 py-3" />
-        <select name="mode" className="rounded-lg border border-line px-4 py-3"><option>immédiat</option><option>programmé</option></select>
-        <select name="category" className="rounded-lg border border-line px-4 py-3"><option>logement</option><option>transport</option><option>alimentation</option><option>loisirs</option><option>études</option><option>autre</option></select>
+        <select name="category" value={formState.category} onChange={(event) => updateField("category", event.target.value)} className="rounded-xl border border-line bg-white px-4 py-3"><option>logement</option><option>transport</option><option>alimentation</option><option>loisirs</option><option>études</option><option>autre</option></select>
+        <input name="executionDate" required type="date" value={formState.executionDate} onChange={(event) => updateField("executionDate", event.target.value)} className="rounded-xl border border-line bg-white px-4 py-3" />
+        <select name="mode" value={formState.mode} onChange={(event) => updateField("mode", event.target.value)} className="rounded-xl border border-line bg-white px-4 py-3"><option>immédiat</option><option>programmé</option></select>
       </div>
-      <button className="tap w-full rounded-lg bg-night px-5 py-3 font-bold text-white shadow-lg shadow-slate-900/20">Continuer</button>
+      <button disabled={!formReady} className="tap w-full rounded-xl bg-night px-5 py-3 font-bold text-white shadow-lg shadow-slate-900/20 transition disabled:cursor-not-allowed disabled:opacity-50">Continuer</button>
       {message && <p className="text-sm font-semibold text-steel">{message}</p>}
     </form>
   );

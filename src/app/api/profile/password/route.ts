@@ -6,7 +6,7 @@ import { passwordSchema } from "@/lib/validation";
 
 export async function POST(req: Request) {
   try {
-    if (!sameOrigin(req)) return fail("Connexion impossible pour le moment", 403);
+    if (!sameOrigin(req)) return fail("Service momentanément indisponible", 403);
     const user = await requireUser();
     if (!user) return fail("Non authentifié", 401);
     const input = passwordSchema.parse(await req.json());

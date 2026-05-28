@@ -39,6 +39,7 @@ export const transferSchema = z.object({
   beneficiary: cleanText(2, 120),
   iban: z.string().trim().min(12).max(42).regex(/^[A-Z0-9 ]+$/, "IBAN invalide"),
   amount: z.coerce.number().positive("Montant invalide").max(100000),
+  currency: z.literal("EUR").default("EUR"),
   label: cleanText(2, 120),
   reference: cleanText(2, 80),
   executionDate: z.string().trim().min(8),

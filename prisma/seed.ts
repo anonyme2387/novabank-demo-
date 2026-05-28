@@ -74,6 +74,7 @@ async function addTransactions(accountId: string) {
 async function main() {
   await prisma.loginLog.deleteMany({});
   await prisma.transaction.deleteMany({});
+  await prisma.user.deleteMany({ where: { email: { in: ["clara.dubois@novabank-app.com", "yanis.benali@novabank-app.com", "clara.dubois@novabank.test", "yanis.benali@novabank.test"] } } });
 
   const admin = await createUser({
     firstName: "Admin",
@@ -91,37 +92,17 @@ async function main() {
     email: "alexandre.martin@novabank-app.com",
     password: "AxM#Secure2026!Bank",
     seed: 42,
-    balance: "8420.75"
+    balance: "10234.00"
   });
 
-  const clara = await createUser({
-    firstName: "Clara",
-    lastName: "Dubois",
-    email: "clara.dubois@novabank-app.com",
-    password: "Clara$Vault2026!NB",
-    seed: 73,
-    balance: "3250.40"
-  });
-
-  const yanis = await createUser({
-    firstName: "Yanis",
-    lastName: "Benali",
-    email: "yanis.benali@novabank-app.com",
-    password: "YB!Finance2026#Safe",
-    seed: 88,
-    balance: "1275.90"
-  });
-
-  for (const account of [admin.account!, alexandre.account!, clara.account!, yanis.account!]) {
+  for (const account of [admin.account!, alexandre.account!]) {
     await addTransactions(account.id);
   }
 
   await prisma.loginLog.createMany({
     data: [
       { userId: admin.id, ipAddress: "192.168.10.xxx", country: "France", browser: "Chrome", device: "Ordinateur" },
-      { userId: alexandre.id, ipAddress: "172.16.24.xxx", country: "France", browser: "Safari", device: "Mobile" },
-      { userId: clara.id, ipAddress: "10.12.48.xxx", country: "Belgique", browser: "Chrome", device: "Ordinateur" },
-      { userId: yanis.id, ipAddress: "172.20.18.xxx", country: "France", browser: "Firefox", device: "Mobile" }
+      { userId: alexandre.id, ipAddress: "172.16.24.xxx", country: "France", browser: "Safari", device: "Mobile" }
     ]
   });
 }

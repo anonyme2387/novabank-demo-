@@ -11,8 +11,11 @@ export default async function TransfersPage() {
   return (
     <AppShell isAdmin={user.role === "ADMIN"}>
       <div className="mx-auto max-w-4xl px-6 py-8">
-        <h1 className="text-4xl font-black text-night">Virements</h1>
-        <p className="mt-3 text-steel">Envoyez de l’argent à un autre utilisateur par email ou IBAN NovaBank.</p>
+        <div className="text-center">
+          <p className="font-semibold text-steel">Opération sécurisée</p>
+          <h1 className="mt-2 text-4xl font-black text-night">Envoyer de l’argent</h1>
+          <p className="mx-auto mt-3 max-w-2xl text-steel">Créez un virement avec contrôle du solde, récapitulatif, écriture bancaire et reçu associé.</p>
+        </div>
         <div className="mt-8"><TransferForm /></div>
       </div>
     </AppShell>

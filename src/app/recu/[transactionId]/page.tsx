@@ -12,8 +12,8 @@ export default async function ReceiptPage({ params }: { params: { transactionId:
   const user = await requireUser();
   if (!user?.account) redirect("/connexion");
   const tx = await prisma.transaction.findFirst({
-    where: { id: params.transactionId, accountId: user.account.id },
-    include: { relatedAccount: { include: { user: true } } }
+    where: user.role === "ADMIN" ? { id: params.transactionId } : { id: params.transactionId, accountId: user.account.id },
+    include: { account: { include: { user: true } }, relatedAccount: { include: { user: true } } }
   });
   if (!tx) redirect("/historique");
   const entryNumber = `ECR-${tx.reference.replace(/[^A-Z0-9]/gi, "").slice(0, 12).toUpperCase()}`;
@@ -39,7 +39,7 @@ export default async function ReceiptPage({ params }: { params: { transactionId:
             <Row label="Numéro d’écriture" value={entryNumber} />
             <Row label="Date et heure" value={new Intl.DateTimeFormat("fr-FR", { dateStyle: "full", timeStyle: "short" }).format(tx.createdAt)} />
             <Row label="Date de valeur" value={new Intl.DateTimeFormat("fr-FR", { dateStyle: "long" }).format(valueDate)} />
-            <Row label="Compte débité" value={`${user.firstName} ${user.lastName}`} />
+            <Row label="Compte débité" value={`${tx.account.user.firstName} ${tx.account.user.lastName}`} />
             <Row label="Compte crédité" value={tx.beneficiaryName ?? tx.relatedAccount?.user.email ?? "Bénéficiaire"} />
             <Row label="IBAN bénéficiaire" value={tx.beneficiaryIban ?? "••••"} />
             <Row label="Montant" value={euro(tx.amount.toString())} />

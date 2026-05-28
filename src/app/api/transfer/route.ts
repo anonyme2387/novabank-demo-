@@ -7,13 +7,15 @@ import { transferSchema } from "@/lib/validation";
 
 export async function POST(req: Request) {
   try {
-    if (!sameOrigin(req)) return fail("Connexion impossible pour le moment", 403);
+    if (!sameOrigin(req)) return fail("Service momentanément indisponible", 403);
     const user = await requireUser();
     if (!user?.account) return fail("Non authentifié", 401);
     if (user.account.status === "BLOCKED") return fail("Compte bloqué", 403);
     const input = transferSchema.parse(await req.json());
     const amount = new Decimal(input.amount);
     if (user.account.balance.lessThan(amount)) return fail("Solde insuffisant", 400);
+    const balanceBefore = user.account.balance;
+    const balanceAfter = user.account.balance.minus(amount);
 
     const recipient = await prisma.account.findFirst({
       where: {
@@ -71,11 +73,16 @@ export async function POST(req: Request) {
         beneficiary: input.beneficiary,
         iban: maskIban(input.iban),
         amount: input.amount,
+        currency: input.currency,
         date: executionDate,
         status: "SUCCESS",
         reference,
         entryNumber: `ECR-${reference.replace(/[^A-Z0-9]/gi, "").slice(0, 12).toUpperCase()}`,
-        valueDate: executionDate
+        valueDate: executionDate,
+        debitedAccount: `${user.firstName} ${user.lastName}`,
+        creditedAccount: input.beneficiary,
+        balanceBefore: balanceBefore.toString(),
+        balanceAfter: balanceAfter.toString()
       }
     });
   } catch (error) {

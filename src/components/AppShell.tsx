@@ -23,9 +23,17 @@ export function AppShell({ children, isAdmin = false }: { children: React.ReactN
             </Link>
           ))}
           {isAdmin && (
-            <Link href="/admin" className="tap block rounded-lg px-4 py-3 text-sm font-semibold text-night hover:bg-mist">
-              Administration
-            </Link>
+            <>
+              <Link href="/admin" className="tap block rounded-lg px-4 py-3 text-sm font-semibold text-night hover:bg-mist">
+                Administration
+              </Link>
+              <Link href="/admin/virements" className="tap block rounded-lg px-4 py-3 text-sm font-semibold text-night hover:bg-mist">
+                Admin virements
+              </Link>
+              <Link href="/admin/ecritures" className="tap block rounded-lg px-4 py-3 text-sm font-semibold text-night hover:bg-mist">
+                Admin écritures
+              </Link>
+            </>
           )}
         </nav>
       </aside>

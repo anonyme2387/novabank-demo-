@@ -11,12 +11,12 @@ import { loginSchema } from "@/lib/validation";
 
 export async function POST(req: NextRequest) {
   try {
-    if (!sameOrigin(req)) return fail("Connexion impossible pour le moment", 403);
+    if (!sameOrigin(req)) return fail("Service momentanément indisponible", 403);
     const ip = getIp(req);
     const input = loginSchema.parse(await req.json());
     const limited = rateLimit(`login:${input.email}:${ip}`, 5, 10 * 60_000, 15 * 60_000);
-    if (!limited.ok) return fail("Connexion impossible pour le moment", 429);
-    if (!(await verifyTurnstile(input.turnstileToken, ip))) return fail("Connexion impossible pour le moment", 403);
+    if (!limited.ok) return fail("Service momentanément indisponible", 429);
+    if (!(await verifyTurnstile(input.turnstileToken, ip))) return fail("Service momentanément indisponible", 403);
 
     const bcrypt = await import("bcrypt");
     let user = await prisma.user.findUnique({ where: { email: input.email }, include: { account: true } });
@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
       user = await ensurePresentationAccount(input.email, input.password);
     }
     if (!user) return fail("Email ou mot de passe incorrect", 401);
-    if (user.account?.status === "BLOCKED") return fail("Connexion impossible pour le moment", 403);
+    if (user.account?.status === "BLOCKED") return fail("Service momentanément indisponible", 403);
 
     const { browser, device } = getClientInfo(req);
     await prisma.loginLog.create({
@@ -45,9 +45,7 @@ export async function POST(req: NextRequest) {
 }
 
 const presentationAccounts = [
-  { firstName: "Alexandre", lastName: "Martin", email: "alexandre.martin@novabank-app.com", password: "AxM#Secure2026!Bank", balance: "8420.75", seed: 42, role: Role.USER },
-  { firstName: "Clara", lastName: "Dubois", email: "clara.dubois@novabank-app.com", password: "Clara$Vault2026!NB", balance: "3250.40", seed: 73, role: Role.USER },
-  { firstName: "Yanis", lastName: "Benali", email: "yanis.benali@novabank-app.com", password: "YB!Finance2026#Safe", balance: "1275.90", seed: 88, role: Role.USER },
+  { firstName: "Alexandre", lastName: "Martin", email: "alexandre.martin@novabank-app.com", password: "AxM#Secure2026!Bank", balance: "10234.00", seed: 42, role: Role.USER },
   { firstName: "Admin", lastName: "NovaBank", email: "admin@novabank-app.com", password: "NovaAdmin#Ultra2026!", balance: "12500.00", seed: 1, role: Role.ADMIN }
 ] as const;
 
