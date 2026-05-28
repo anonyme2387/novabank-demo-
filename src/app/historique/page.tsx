@@ -13,8 +13,10 @@ const filters: [string, string][] = [["Tous", ""], ["Dépôt", "DEPOSIT"], ["Ret
 export default async function HistoryPage({ searchParams }: { searchParams: { type?: TransactionType } }) {
   const user = await requireUser();
   if (!user?.account) redirect("/connexion");
+  const account = user.account;
   const txs = await prisma.transaction.findMany({
-    where: { accountId: user.account.id, ...(searchParams.type ? { type: searchParams.type } : {}) },
+    where: { accountId: account.id, ...(searchParams.type ? { type: searchParams.type } : {}) },
+    include: { relatedAccount: true },
     orderBy: { createdAt: "desc" }
   });
   return (
@@ -25,7 +27,7 @@ export default async function HistoryPage({ searchParams }: { searchParams: { ty
         <div className="mt-6 overflow-hidden rounded-2xl bg-white shadow-sm">
           {txs.map((tx) => (
             <div key={tx.id} className="grid gap-2 border-b border-line p-5 md:grid-cols-[1fr_180px_140px] md:items-center">
-              <div><p className="font-black text-night">{tx.label}</p><p className="text-sm text-steel">{new Intl.DateTimeFormat("fr-FR", { dateStyle: "medium", timeStyle: "short" }).format(tx.createdAt)}</p></div>
+              <div><p className="font-black text-night">{tx.label}</p><p className="text-sm text-steel">{new Intl.DateTimeFormat("fr-FR", { dateStyle: "medium", timeStyle: "short" }).format(tx.createdAt)}</p><p className="mt-1 text-xs font-semibold text-steel">IBAN bénéficiaire: {tx.beneficiaryIban ?? tx.relatedAccount?.ibanFake ?? account.ibanFake}</p></div>
               <span className="font-semibold text-steel">{tx.type}</span>
               <span className="text-right font-black">{euro(tx.amount.toString())}</span>
               <div className="flex gap-2 md:col-start-2">

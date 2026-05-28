@@ -28,6 +28,7 @@ export default async function AdminEntriesPage() {
       valueDate: tx.executionDate ?? tx.createdAt,
       debited: debit ? `${tx.account.user.firstName} ${tx.account.user.lastName}` : "-",
       credited: tx.beneficiaryName ?? tx.relatedAccount?.user.email ?? `${tx.account.user.firstName} ${tx.account.user.lastName}`,
+      beneficiaryIban: tx.beneficiaryIban ?? tx.relatedAccount?.ibanFake ?? tx.account.ibanFake,
       debit,
       credit,
       reference: tx.reference,
@@ -49,7 +50,7 @@ export default async function AdminEntriesPage() {
           <div className="overflow-x-auto">
             <table className="min-w-[1100px] w-full text-left text-sm">
               <thead className="bg-mist text-xs uppercase text-steel">
-                <tr><Th>Numéro écriture</Th><Th>Date comptable</Th><Th>Date valeur</Th><Th>Compte débité</Th><Th>Compte crédité</Th><Th>Débit</Th><Th>Crédit</Th><Th>Référence</Th><Th>Statut</Th><Th>Détail</Th></tr>
+                <tr><Th>Numéro écriture</Th><Th>Date comptable</Th><Th>Date valeur</Th><Th>Compte débité</Th><Th>Compte crédité</Th><Th>IBAN bénéficiaire</Th><Th>Débit</Th><Th>Crédit</Th><Th>Référence</Th><Th>Statut</Th><Th>Détail</Th></tr>
               </thead>
               <tbody className="divide-y divide-line">
                 {entries.map((entry) => (
@@ -59,6 +60,7 @@ export default async function AdminEntriesPage() {
                     <Td>{formatDate(entry.valueDate)}</Td>
                     <Td>{entry.debited}</Td>
                     <Td>{entry.credited}</Td>
+                    <Td>{entry.beneficiaryIban}</Td>
                     <Td className="font-black text-red-600">{entry.debit ? euro(entry.debit) : "-"}</Td>
                     <Td className="font-black text-emerald-700">{entry.credit ? euro(entry.credit) : "-"}</Td>
                     <Td>{entry.reference}</Td>

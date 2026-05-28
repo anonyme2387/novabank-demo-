@@ -4,7 +4,6 @@ import { ReceiptActions } from "@/components/ReceiptActions";
 import { AppShell } from "@/components/AppShell";
 import { requireAdmin } from "@/lib/auth";
 import { euro } from "@/lib/banking";
-import { maskIban } from "@/lib/security";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -51,7 +50,7 @@ export default async function AdminTransferDetailPage({ params }: { params: { tr
             <div className="mt-6 grid gap-4 sm:grid-cols-2">
               <Info label="Émetteur" value={`${tx.account.user.firstName} ${tx.account.user.lastName}`} />
               <Info label="Bénéficiaire" value={tx.beneficiaryName ?? tx.relatedAccount?.user.email ?? "-"} />
-              <Info label="IBAN masqué" value={tx.beneficiaryIban ?? maskIban(tx.relatedAccount?.ibanFake ?? tx.account.ibanFake)} />
+              <Info label="IBAN bénéficiaire" value={tx.beneficiaryIban ?? tx.relatedAccount?.ibanFake ?? tx.account.ibanFake} />
               <Info label="Montant" value={euro(tx.amount.toString())} />
               <Info label="Devise" value={tx.account.currency} />
               <Info label="Motif" value={tx.label} />
@@ -62,6 +61,7 @@ export default async function AdminTransferDetailPage({ params }: { params: { tr
               <Info label="Numéro écriture" value={entryNumber} />
               <Info label="Date de valeur" value={formatDate(valueDate)} />
               <Info label="Compte débité" value={debit ? `${tx.account.user.firstName} ${tx.account.user.lastName}` : "-"} />
+              <Info label="IBAN émetteur" value={tx.account.ibanFake} />
               <Info label="Compte crédité" value={tx.beneficiaryName ?? tx.relatedAccount?.user.email ?? "-"} />
               <Info label="Solde avant" value={euro(balanceBefore)} />
               <Info label="Solde après" value={euro(balanceAfter)} />

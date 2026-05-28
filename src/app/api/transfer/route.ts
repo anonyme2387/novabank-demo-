@@ -2,7 +2,7 @@ import { Decimal } from "@prisma/client/runtime/library";
 import { requireUser } from "@/lib/auth";
 import { fail, handleError, ok } from "@/lib/api";
 import { prisma } from "@/lib/prisma";
-import { maskIban, sameOrigin, txReference } from "@/lib/security";
+import { sameOrigin, txReference } from "@/lib/security";
 import { transferSchema } from "@/lib/validation";
 
 export async function POST(req: Request) {
@@ -41,7 +41,7 @@ export async function POST(req: Request) {
           category: input.category,
           reference,
           beneficiaryName: input.beneficiary,
-          beneficiaryIban: maskIban(input.iban),
+          beneficiaryIban: input.iban,
           executionDate,
           transferMode: input.mode,
           status: "SUCCESS"
@@ -62,7 +62,7 @@ export async function POST(req: Request) {
           category: input.category,
           reference: creditReference,
           beneficiaryName: `${user.firstName} ${user.lastName}`,
-          beneficiaryIban: maskIban(user.account.ibanFake),
+          beneficiaryIban: user.account.ibanFake,
           executionDate,
           transferMode: input.mode,
           status: "SUCCESS"
@@ -78,7 +78,7 @@ export async function POST(req: Request) {
       receipt: {
         emitter: `${user.firstName} ${user.lastName}`,
         beneficiary: input.beneficiary,
-        iban: maskIban(input.iban),
+        iban: input.iban,
         amount: input.amount,
         currency: input.currency,
         transferType: recipient ? "Interne NovaBank" : "Externe simulé",

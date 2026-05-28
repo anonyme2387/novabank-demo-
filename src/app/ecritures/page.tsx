@@ -12,14 +12,16 @@ const debitTypes = new Set(["WITHDRAWAL", "TRANSFER_OUT"]);
 export default async function EntriesPage() {
   const user = await requireUser();
   if (!user?.account) redirect("/connexion");
+  const account = user.account;
 
   const transactions = await prisma.transaction.findMany({
-    where: { accountId: user.account.id },
+    where: { accountId: account.id },
+    include: { relatedAccount: true },
     orderBy: { createdAt: "desc" },
     take: 80
   });
 
-  let runningBalance = Number(user.account.balance);
+  let runningBalance = Number(account.balance);
   const entries = transactions.map((tx) => {
     const amount = Number(tx.amount);
     const debit = debitTypes.has(tx.type) ? amount : 0;
@@ -38,7 +40,7 @@ export default async function EntriesPage() {
             <h1 className="mt-1 text-4xl font-black text-night">Écritures bancaires</h1>
           </div>
           <div className="rounded-2xl bg-white px-5 py-3 text-sm font-bold text-steel shadow-sm">
-            Solde disponible: <span className="sensitive text-night">{euro(user.account.balance.toString())}</span>
+            Solde disponible: <span className="sensitive text-night">{euro(account.balance.toString())}</span>
           </div>
         </div>
 
@@ -54,6 +56,7 @@ export default async function EntriesPage() {
                   <Th>Date</Th>
                   <Th>Référence</Th>
                   <Th>Libellé</Th>
+                  <Th>IBAN bénéficiaire</Th>
                   <Th>Débit</Th>
                   <Th>Crédit</Th>
                   <Th>Solde</Th>
@@ -76,6 +79,7 @@ export default async function EntriesPage() {
                       <span className="font-bold text-night">{tx.label}</span>
                       <span className="block text-xs capitalize text-steel">{tx.category}</span>
                     </Td>
+                    <Td>{tx.beneficiaryIban ?? tx.relatedAccount?.ibanFake ?? account.ibanFake}</Td>
                     <Td className="font-black text-red-600">{debit ? euro(debit) : "-"}</Td>
                     <Td className="font-black text-emerald-700">{credit ? euro(credit) : "-"}</Td>
                     <Td className="sensitive font-black text-night">{euro(balanceAfter)}</Td>

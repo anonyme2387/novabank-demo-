@@ -67,7 +67,7 @@ export default async function AdminTransfersPage({ searchParams }: { searchParam
           <div className="overflow-x-auto">
             <table className="min-w-[1180px] w-full text-left text-sm">
               <thead className="bg-mist text-xs uppercase text-steel">
-                <tr><Th>Date</Th><Th>Émetteur</Th><Th>Bénéficiaire</Th><Th>IBAN masqué</Th><Th>Montant</Th><Th>Devise</Th><Th>Motif</Th><Th>Référence</Th><Th>Catégorie</Th><Th>Statut</Th><Th>Action</Th></tr>
+                <tr><Th>Date</Th><Th>Émetteur</Th><Th>Bénéficiaire</Th><Th>IBAN bénéficiaire</Th><Th>Montant</Th><Th>Devise</Th><Th>Motif</Th><Th>Référence</Th><Th>Catégorie</Th><Th>Statut</Th><Th>Action</Th></tr>
               </thead>
               <tbody className="divide-y divide-line">
                 {transactions.map((tx) => (
@@ -75,7 +75,7 @@ export default async function AdminTransfersPage({ searchParams }: { searchParam
                     <Td>{formatDateTime(tx.createdAt)}</Td>
                     <Td>{tx.account.user.firstName} {tx.account.user.lastName}</Td>
                     <Td>{tx.beneficiaryName ?? tx.relatedAccount?.user.email ?? "-"}</Td>
-                    <Td>{tx.beneficiaryIban ?? "••••"}</Td>
+                    <Td>{tx.beneficiaryIban ?? tx.relatedAccount?.ibanFake ?? tx.account.ibanFake}</Td>
                     <Td className="font-black text-night">{euro(tx.amount.toString())}</Td>
                     <Td>{tx.account.currency}</Td>
                     <Td>{tx.label}</Td>

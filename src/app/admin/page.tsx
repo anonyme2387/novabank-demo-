@@ -168,7 +168,7 @@ export default async function AdminPage() {
         <Panel title="Écritures bancaires simulées">
           <Table>
             <thead className="bg-mist text-xs uppercase text-steel">
-              <tr><Th>Numéro</Th><Th>Date comptable</Th><Th>Date valeur</Th><Th>Compte débité</Th><Th>Compte crédité</Th><Th>Débit</Th><Th>Crédit</Th><Th>Solde après</Th><Th>Référence</Th><Th>Statut</Th></tr>
+              <tr><Th>Numéro</Th><Th>Date comptable</Th><Th>Date valeur</Th><Th>Compte débité</Th><Th>Compte crédité</Th><Th>IBAN bénéficiaire</Th><Th>Débit</Th><Th>Crédit</Th><Th>Solde après</Th><Th>Référence</Th><Th>Statut</Th></tr>
             </thead>
             <tbody className="divide-y divide-line">
               {entries.slice(0, 20).map((entry) => (
@@ -178,6 +178,7 @@ export default async function AdminPage() {
                   <Td>{formatDate(entry.valueDate)}</Td>
                   <Td>{entry.debited}</Td>
                   <Td>{entry.credited}</Td>
+                  <Td>{entry.beneficiaryIban}</Td>
                   <Td className="font-black text-red-600">{entry.debit ? euro(entry.debit) : "-"}</Td>
                   <Td className="font-black text-emerald-700">{entry.credit ? euro(entry.credit) : "-"}</Td>
                   <Td className="font-black">{euro(entry.balanceAfter)}</Td>
@@ -230,6 +231,7 @@ function buildEntries(transactions: Array<any>) {
       valueDate: tx.executionDate ?? tx.createdAt,
       debited: debit ? `${tx.account.user.firstName} ${tx.account.user.lastName}` : "-",
       credited: tx.beneficiaryName ?? tx.relatedAccount?.user.email ?? `${tx.account.user.firstName} ${tx.account.user.lastName}`,
+      beneficiaryIban: tx.beneficiaryIban ?? tx.relatedAccount?.ibanFake ?? tx.account.ibanFake,
       debit,
       credit,
       balanceAfter,

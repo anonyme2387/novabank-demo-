@@ -40,8 +40,9 @@ export default async function ReceiptPage({ params }: { params: { transactionId:
             <Row label="Date et heure" value={new Intl.DateTimeFormat("fr-FR", { dateStyle: "full", timeStyle: "short" }).format(tx.createdAt)} />
             <Row label="Date de valeur" value={new Intl.DateTimeFormat("fr-FR", { dateStyle: "long" }).format(valueDate)} />
             <Row label="Compte débité" value={`${tx.account.user.firstName} ${tx.account.user.lastName}`} />
+            <Row label="IBAN émetteur" value={tx.account.ibanFake} />
             <Row label="Compte crédité" value={tx.beneficiaryName ?? tx.relatedAccount?.user.email ?? "Bénéficiaire"} />
-            <Row label="IBAN bénéficiaire" value={tx.beneficiaryIban ?? "••••"} />
+            <Row label="IBAN bénéficiaire" value={tx.beneficiaryIban ?? tx.relatedAccount?.ibanFake ?? tx.account.ibanFake} />
             <Row label="Montant" value={euro(tx.amount.toString())} />
             <Row label="Motif" value={tx.label} />
             <Row label="Catégorie" value={tx.category} />
