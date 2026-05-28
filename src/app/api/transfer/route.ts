@@ -23,19 +23,18 @@ export async function POST(req: Request) {
       },
       include: { user: true }
     });
-    if (!recipient) return fail("Destinataire introuvable", 404);
-    if (recipient.id === user.account.id) return fail("Auto-virement impossible", 400);
-    if (recipient.status === "BLOCKED") return fail("Compte destinataire bloqué", 403);
+    if (recipient?.id === user.account.id) return fail("Auto-virement impossible", 400);
+    if (recipient?.status === "BLOCKED") return fail("Compte destinataire bloqué", 403);
 
-    const reference = txReference();
+    const reference = await uniqueReference(input.reference);
+    const creditReference = recipient ? await uniqueReference(`${reference}-C`) : "";
     const executionDate = new Date(input.executionDate);
-    await prisma.$transaction([
+    const writes = [
       prisma.account.update({ where: { id: user.account.id }, data: { balance: { decrement: amount } } }),
-      prisma.account.update({ where: { id: recipient.id }, data: { balance: { increment: amount } } }),
       prisma.transaction.create({
         data: {
           accountId: user.account.id,
-          relatedAccountId: recipient.id,
+          relatedAccountId: recipient?.id,
           type: "TRANSFER_OUT",
           amount,
           label: input.label,
@@ -47,8 +46,13 @@ export async function POST(req: Request) {
           transferMode: input.mode,
           status: "SUCCESS"
         }
-      }),
-      prisma.transaction.create({
+      })
+    ];
+
+    if (recipient) {
+      writes.push(
+        prisma.account.update({ where: { id: recipient.id }, data: { balance: { increment: amount } } }),
+        prisma.transaction.create({
         data: {
           accountId: recipient.id,
           relatedAccountId: user.account.id,
@@ -56,15 +60,18 @@ export async function POST(req: Request) {
           amount,
           label: input.label,
           category: input.category,
-          reference: `${reference}-C`,
+          reference: creditReference,
           beneficiaryName: `${user.firstName} ${user.lastName}`,
           beneficiaryIban: maskIban(user.account.ibanFake),
           executionDate,
           transferMode: input.mode,
           status: "SUCCESS"
         }
-      })
-    ]);
+        })
+      );
+    }
+
+    await prisma.$transaction(writes);
     return ok({
       success: true,
       reference,
@@ -74,6 +81,7 @@ export async function POST(req: Request) {
         iban: maskIban(input.iban),
         amount: input.amount,
         currency: input.currency,
+        transferType: recipient ? "Interne NovaBank" : "Externe simulé",
         date: executionDate,
         status: "SUCCESS",
         reference,
@@ -88,4 +96,11 @@ export async function POST(req: Request) {
   } catch (error) {
     return handleError(error);
   }
+}
+
+async function uniqueReference(inputReference: string) {
+  const clean = inputReference.trim().replace(/[<>]/g, "");
+  const existing = await prisma.transaction.findUnique({ where: { reference: clean } });
+  if (!existing) return clean;
+  return `${clean}-${txReference().replace("NOVA-", "")}`;
 }

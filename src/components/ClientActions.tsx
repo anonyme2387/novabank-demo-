@@ -126,7 +126,7 @@ export function TransferForm() {
     return (
       <div className="rounded-2xl bg-white p-6 shadow-premium">
         <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-2xl font-black text-night">Virement exécuté</h2>
+          <h2 className="text-2xl font-black text-night">Virement confirmé</h2>
           <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700">Réussi</span>
         </div>
         <div className="rounded-2xl border border-line p-5">

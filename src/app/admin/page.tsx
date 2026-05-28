@@ -229,7 +229,7 @@ function buildEntries(transactions: Array<any>) {
       createdAt: tx.createdAt,
       valueDate: tx.executionDate ?? tx.createdAt,
       debited: debit ? `${tx.account.user.firstName} ${tx.account.user.lastName}` : "-",
-      credited: credit ? (tx.beneficiaryName ?? tx.relatedAccount?.user.email ?? `${tx.account.user.firstName} ${tx.account.user.lastName}`) : "-",
+      credited: tx.beneficiaryName ?? tx.relatedAccount?.user.email ?? `${tx.account.user.firstName} ${tx.account.user.lastName}`,
       debit,
       credit,
       balanceAfter,

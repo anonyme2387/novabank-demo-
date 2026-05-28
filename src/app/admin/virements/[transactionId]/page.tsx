@@ -62,7 +62,7 @@ export default async function AdminTransferDetailPage({ params }: { params: { tr
               <Info label="Numéro écriture" value={entryNumber} />
               <Info label="Date de valeur" value={formatDate(valueDate)} />
               <Info label="Compte débité" value={debit ? `${tx.account.user.firstName} ${tx.account.user.lastName}` : "-"} />
-              <Info label="Compte crédité" value={credit ? (tx.beneficiaryName ?? tx.relatedAccount?.user.email ?? "-") : "-"} />
+              <Info label="Compte crédité" value={tx.beneficiaryName ?? tx.relatedAccount?.user.email ?? "-"} />
               <Info label="Solde avant" value={euro(balanceBefore)} />
               <Info label="Solde après" value={euro(balanceAfter)} />
             </div>
