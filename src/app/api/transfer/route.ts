@@ -63,7 +63,21 @@ export async function POST(req: Request) {
         }
       })
     ]);
-    return ok({ success: true, reference, receipt: { emitter: `${user.firstName} ${user.lastName}`, beneficiary: input.beneficiary, iban: maskIban(input.iban), amount: input.amount, date: executionDate, status: "SUCCESS", reference } });
+    return ok({
+      success: true,
+      reference,
+      receipt: {
+        emitter: `${user.firstName} ${user.lastName}`,
+        beneficiary: input.beneficiary,
+        iban: maskIban(input.iban),
+        amount: input.amount,
+        date: executionDate,
+        status: "SUCCESS",
+        reference,
+        entryNumber: `ECR-${reference.replace(/[^A-Z0-9]/gi, "").slice(0, 12).toUpperCase()}`,
+        valueDate: executionDate
+      }
+    });
   } catch (error) {
     return handleError(error);
   }

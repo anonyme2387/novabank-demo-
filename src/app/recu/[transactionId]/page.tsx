@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AppShell } from "@/components/AppShell";
+import { ReceiptActions } from "@/components/ReceiptActions";
 import { requireUser } from "@/lib/auth";
 import { euro } from "@/lib/banking";
 import { prisma } from "@/lib/prisma";
@@ -15,10 +16,12 @@ export default async function ReceiptPage({ params }: { params: { transactionId:
     include: { relatedAccount: { include: { user: true } } }
   });
   if (!tx) redirect("/historique");
+  const entryNumber = `ECR-${tx.reference.replace(/[^A-Z0-9]/gi, "").slice(0, 12).toUpperCase()}`;
+  const valueDate = tx.executionDate ?? tx.createdAt;
   return (
     <AppShell isAdmin={user.role === "ADMIN"}>
       <main className="mx-auto max-w-3xl px-6 py-10">
-        <div className="rounded-3xl bg-white p-8 shadow-premium">
+        <div className="rounded-3xl border border-white/70 bg-white p-8 shadow-premium">
           <div className="flex items-start justify-between gap-4">
             <div>
               <h1 className="text-3xl font-black text-night">NovaBank</h1>
@@ -26,9 +29,16 @@ export default async function ReceiptPage({ params }: { params: { transactionId:
             </div>
             <span className="rounded-full bg-emerald-50 px-4 py-2 text-xs font-black text-emerald-700">{tx.status}</span>
           </div>
-          <div className="mt-8 grid gap-4">
+          <div className="mt-8 rounded-2xl bg-night p-6 text-white">
+            <p className="text-sm font-semibold text-white/60">Montant de l’opération</p>
+            <p className="mt-2 text-4xl font-black">{euro(tx.amount.toString())}</p>
+            <p className="mt-3 text-sm text-white/60">{tx.label}</p>
+          </div>
+          <div className="mt-8 grid gap-4 rounded-2xl border border-line p-5">
             <Row label="Référence" value={tx.reference} />
+            <Row label="Numéro d’écriture" value={entryNumber} />
             <Row label="Date et heure" value={new Intl.DateTimeFormat("fr-FR", { dateStyle: "full", timeStyle: "short" }).format(tx.createdAt)} />
+            <Row label="Date de valeur" value={new Intl.DateTimeFormat("fr-FR", { dateStyle: "long" }).format(valueDate)} />
             <Row label="Compte débité" value={`${user.firstName} ${user.lastName}`} />
             <Row label="Compte crédité" value={tx.beneficiaryName ?? tx.relatedAccount?.user.email ?? "Bénéficiaire"} />
             <Row label="IBAN bénéficiaire" value={tx.beneficiaryIban ?? "••••"} />
@@ -36,7 +46,10 @@ export default async function ReceiptPage({ params }: { params: { transactionId:
             <Row label="Motif" value={tx.label} />
             <Row label="Catégorie" value={tx.category} />
           </div>
-          <Link href="/historique" className="mt-8 inline-flex rounded-lg bg-night px-5 py-3 font-black text-white">Retour à l’historique</Link>
+          <div className="mt-8 flex flex-wrap items-center gap-3">
+            <ReceiptActions filename={`recu-${tx.reference}.txt`} />
+            <Link href="/historique" className="inline-flex rounded-lg bg-night px-5 py-3 font-black text-white">Retour à l’historique</Link>
+          </div>
         </div>
       </main>
     </AppShell>

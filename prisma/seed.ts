@@ -3,10 +3,8 @@ import { PrismaClient, Role, TransactionType } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-const password = "NovaBank2026!";
-
 function ibanFake(seed: number) {
-  return `NVBA FR76 3000 6000 ${String(100000 + seed)} 0000 ${String(1000 + seed)} 189`;
+  return `NBFR FR76 3000 6000 ${String(100000 + seed)} 0000 ${String(1000 + seed)} 189`;
 }
 
 function cardNumber(seed: number) {
@@ -80,8 +78,8 @@ async function main() {
   const admin = await createUser({
     firstName: "Admin",
     lastName: "NovaBank",
-    email: "admin@novabank.demo",
-    password: "Admin123!",
+    email: "admin@novabank-app.com",
+    password: "NovaAdmin#Ultra2026!",
     role: Role.ADMIN,
     seed: 1,
     balance: "12500.00"
@@ -90,8 +88,8 @@ async function main() {
   const alexandre = await createUser({
     firstName: "Alexandre",
     lastName: "Martin",
-    email: "alexandre.martin@novabank.test",
-    password,
+    email: "alexandre.martin@novabank-app.com",
+    password: "AxM#Secure2026!Bank",
     seed: 42,
     balance: "8420.75"
   });
@@ -99,8 +97,8 @@ async function main() {
   const clara = await createUser({
     firstName: "Clara",
     lastName: "Dubois",
-    email: "clara.dubois@novabank.test",
-    password,
+    email: "clara.dubois@novabank-app.com",
+    password: "Clara$Vault2026!NB",
     seed: 73,
     balance: "3250.40"
   });
@@ -108,8 +106,8 @@ async function main() {
   const yanis = await createUser({
     firstName: "Yanis",
     lastName: "Benali",
-    email: "yanis.benali@novabank.test",
-    password,
+    email: "yanis.benali@novabank-app.com",
+    password: "YB!Finance2026#Safe",
     seed: 88,
     balance: "1275.90"
   });

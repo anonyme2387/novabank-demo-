@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Turnstile } from "@/components/Turnstile";
@@ -14,12 +14,20 @@ export function AuthForm({ mode }: { mode: Mode }) {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const score = useMemo(() => [
+    password.length >= 10,
+    /[A-Z]/.test(password),
+    /[a-z]/.test(password),
+    /[0-9]/.test(password),
+    /[^A-Za-z0-9]/.test(password)
+  ].filter(Boolean).length, [password]);
 
   const demos = [
-    ["Alexandre", "alexandre.martin@novabank.test", "NovaBank2026!"],
-    ["Clara", "clara.dubois@novabank.test", "NovaBank2026!"],
-    ["Yanis", "yanis.benali@novabank.test", "NovaBank2026!"],
-    ["Admin", "admin@novabank.demo", "Admin123!"]
+    ["Alexandre", "alexandre.martin@novabank-app.com", "AxM#Secure2026!Bank"],
+    ["Clara", "clara.dubois@novabank-app.com", "Clara$Vault2026!NB"],
+    ["Yanis", "yanis.benali@novabank-app.com", "YB!Finance2026#Safe"],
+    ["Admin", "admin@novabank-app.com", "NovaAdmin#Ultra2026!"]
   ];
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -80,7 +88,17 @@ export function AuthForm({ mode }: { mode: Mode }) {
         </div>
       )}
       <input name="email" value={email} onChange={(event) => setEmail(event.target.value)} required type="email" placeholder="Email" className="w-full rounded-lg border border-line px-4 py-3" />
-      <input name="password" value={password} onChange={(event) => setPassword(event.target.value)} required type="password" placeholder="Mot de passe" className="w-full rounded-lg border border-line px-4 py-3" />
+      <div className="relative">
+        <input name="password" value={password} onChange={(event) => setPassword(event.target.value)} required type={showPassword ? "text" : "password"} placeholder="Mot de passe" className="w-full rounded-lg border border-line px-4 py-3 pr-28" />
+        <button type="button" onClick={() => setShowPassword((value) => !value)} className="absolute right-2 top-2 rounded-md bg-mist px-3 py-2 text-xs font-black text-night">
+          {showPassword ? "Masquer" : "Afficher"}
+        </button>
+      </div>
+      {mode === "register" && (
+        <div className="grid grid-cols-5 gap-2">
+          {[0, 1, 2, 3, 4].map((item) => <span key={item} className={`h-2 rounded-full ${item < score ? "bg-mint" : "bg-line"}`} />)}
+        </div>
+      )}
       {mode === "register" && (
         <input name="confirmPassword" required type="password" placeholder="Confirmer le mot de passe" className="w-full rounded-lg border border-line px-4 py-3" />
       )}

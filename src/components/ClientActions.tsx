@@ -33,7 +33,7 @@ export function OperationButtons() {
 export function TransferForm() {
   const router = useRouter();
   const [message, setMessage] = useState("");
-  const [step, setStep] = useState<"form" | "review" | "success">("form");
+  const [step, setStep] = useState<"form" | "review" | "processing" | "success">("form");
   const [payload, setPayload] = useState<Record<string, FormDataEntryValue | string> | null>(null);
   const [receipt, setReceipt] = useState<Record<string, string> | null>(null);
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -55,6 +55,8 @@ export function TransferForm() {
   }
   async function confirm() {
     if (!payload) return;
+    setStep("processing");
+    await new Promise((resolve) => setTimeout(resolve, 900));
     const res = await fetch("/api/transfer", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -69,6 +71,21 @@ export function TransferForm() {
     setReceipt(json.receipt);
     setStep("success");
     router.refresh();
+  }
+  if (step === "processing") {
+    return (
+      <div className="premium-panel rounded-2xl p-6">
+        <h2 className="text-2xl font-black text-night">Traitement en cours</h2>
+        <div className="mt-6 space-y-3">
+          {["Analyse de l’opération", "Vérification du solde", "Génération de l’écriture", "Transaction validée"].map((item, index) => (
+            <div key={item} className="flex items-center gap-3 rounded-xl bg-white p-4">
+              <span className="h-3 w-3 animate-pulse rounded-full bg-mint" style={{ animationDelay: `${index * 150}ms` }} />
+              <span className="font-black text-night">{item}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
   }
   if (step === "review" && payload) {
     return (

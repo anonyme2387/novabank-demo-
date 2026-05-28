@@ -5,6 +5,7 @@ import { AutoLogout } from "@/components/SecurityClient";
 const nav = [
   ["Accueil", "/dashboard"],
   ["Virements", "/virements"],
+  ["Écritures", "/ecritures"],
   ["Historique", "/historique"],
   ["Profil", "/profil"]
 ];
@@ -29,7 +30,7 @@ export function AppShell({ children, isAdmin = false }: { children: React.ReactN
         </nav>
       </aside>
       <main className="md:ml-72">{children}</main>
-      <nav className="fixed bottom-0 left-0 right-0 z-20 grid grid-cols-4 border-t border-line bg-white/95 px-2 pb-5 pt-2 text-center text-[11px] font-semibold text-steel shadow-[0_-18px_40px_rgba(5,8,22,.08)] backdrop-blur md:hidden">
+      <nav className="fixed bottom-0 left-0 right-0 z-20 grid grid-cols-5 border-t border-line bg-white/95 px-2 pb-5 pt-2 text-center text-[10px] font-semibold text-steel shadow-[0_-18px_40px_rgba(5,8,22,.08)] backdrop-blur md:hidden">
         {nav.map(([label, href]) => (
           <Link key={href} href={href} className="tap rounded-2xl px-2 py-2 hover:bg-mist hover:text-night">
             <span className="mx-auto mb-1 block h-1 w-6 rounded-full bg-line" />

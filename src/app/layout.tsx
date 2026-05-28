@@ -18,7 +18,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <nav className="flex gap-5">
               <Link href="/conditions-utilisation" className="font-semibold hover:text-night">Conditions</Link>
               <Link href="/#securite" className="font-semibold hover:text-night">Sécurité</Link>
-              <a href="mailto:contact@novabank.demo" className="font-semibold hover:text-night">Contact</a>
+              <a href="mailto:contact@novabank-app.com" className="font-semibold hover:text-night">Contact</a>
             </nav>
           </div>
         </footer>
