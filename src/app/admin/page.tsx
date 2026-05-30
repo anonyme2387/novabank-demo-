@@ -12,7 +12,7 @@ const debitTypes = new Set(["WITHDRAWAL", "TRANSFER_OUT"]);
 
 export default async function AdminPage() {
   const admin = await requireAdmin();
-  if (!admin) redirect("/dashboard");
+  if (!admin) redirect("/dashboard?error=admin");
 
   const [users, accounts, transactions, logs] = await Promise.all([
     prisma.user.findMany({
@@ -49,6 +49,7 @@ export default async function AdminPage() {
           <div className="flex flex-wrap gap-3">
             <Link href="/admin/virements" className="rounded-xl bg-night px-5 py-3 text-sm font-black text-white shadow-lg shadow-slate-900/20">Virements</Link>
             <Link href="/admin/ecritures" className="rounded-xl bg-white px-5 py-3 text-sm font-black text-night shadow-sm">Écritures</Link>
+            <Link href="/admin/securite" className="rounded-xl bg-white px-5 py-3 text-sm font-black text-night shadow-sm">Sécurité</Link>
           </div>
         </div>
 

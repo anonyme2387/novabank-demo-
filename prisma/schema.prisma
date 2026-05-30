@@ -45,6 +45,7 @@ model User {
   createdAt    DateTime   @default(now())
   account      Account?
   loginLogs    LoginLog[]
+  securityLogs SecurityLog[]
 }
 
 model Account {
@@ -99,4 +100,25 @@ model LoginLog {
   device    String
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model SecurityLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  email     String?
+  event     String
+  level     String   @default("INFO")
+  message   String
+  ipAddress String   @default("0.0.0.0")
+  country   String   @default("Pays inconnu")
+  browser   String   @default("Navigateur inconnu")
+  device    String   @default("Inconnu")
+  metadata  Json?
+  createdAt DateTime @default(now())
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt])
+  @@index([event])
+  @@index([level])
+  @@index([userId])
 }

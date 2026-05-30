@@ -251,7 +251,7 @@ export function TransferForm() {
       <div className="premium-panel rounded-2xl p-6">
         <h2 className="text-2xl font-black text-night">Traitement en cours</h2>
         <div className="mt-6 space-y-3">
-          {["Analyse du paiement", "Vérification du solde", "Génération de l’écriture bancaire", "Virement confirmé"].map((item, index) => (
+          {["Analyse anti-fraude", "Vérification session", "Vérification comportement", "Validation finale"].map((item, index) => (
             <div key={item} className="flex items-center gap-3 rounded-xl bg-white p-4">
               <span className="h-3 w-3 animate-pulse rounded-full bg-mint" style={{ animationDelay: `${index * 150}ms` }} />
               <span className="font-black text-night">{item}</span>

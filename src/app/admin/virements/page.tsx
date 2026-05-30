@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 
 export default async function AdminTransfersPage({ searchParams }: { searchParams: Record<string, string | undefined> }) {
   const admin = await requireAdmin();
-  if (!admin) redirect("/dashboard");
+  if (!admin) redirect("/dashboard?error=admin");
 
   const transactions = await prisma.transaction.findMany({
     where: {

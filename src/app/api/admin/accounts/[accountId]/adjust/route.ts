@@ -1,12 +1,13 @@
 import { Decimal } from "@prisma/client/runtime/library";
-import { requireAdmin } from "@/lib/auth";
+import { requireAdminApi, logAdminAction } from "@/lib/admin-security";
 import { fail, handleError, ok } from "@/lib/api";
 import { prisma } from "@/lib/prisma";
 import { amountSchema } from "@/lib/validation";
 
 export async function POST(req: Request, { params }: { params: { accountId: string } }) {
   try {
-    const admin = await requireAdmin();
+    const { admin, response } = await requireAdminApi(req);
+    if (response) return response;
     if (!admin) return fail("Accès refusé", 403);
     const body = await req.json();
     const mode = body.mode === "remove" ? "remove" : "add";
@@ -29,6 +30,7 @@ export async function POST(req: Request, { params }: { params: { accountId: stri
         }
       }
     });
+    await logAdminAction(req, admin, "ADMIN_ACCOUNT_ADJUST", "Ajustement de solde administrateur", { accountId: params.accountId, mode, amount: input.amount });
     return ok({ balance: updated.balance.toString() });
   } catch (error) {
     return handleError(error);

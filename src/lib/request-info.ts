@@ -1,13 +1,12 @@
 import "server-only";
-import { NextRequest } from "next/server";
 import { UAParser } from "ua-parser-js";
 
-export function getIp(req: NextRequest) {
+export function getIp(req: Request) {
   const forwarded = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
   return forwarded || req.headers.get("x-real-ip") || "0.0.0.0";
 }
 
-export function getClientInfo(req: NextRequest) {
+export function getClientInfo(req: Request) {
   const parser = new UAParser(req.headers.get("user-agent") ?? "");
   const browser = parser.getBrowser().name ?? "Navigateur inconnu";
   const deviceType = parser.getDevice().type;

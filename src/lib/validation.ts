@@ -34,6 +34,14 @@ export const amountSchema = z.object({
   category: z.enum(["logement", "transport", "alimentation", "loisirs", "études", "autre"]).default("autre")
 });
 
+export const cardPaymentSchema = amountSchema.extend({
+  cardNumber: z.string().trim().regex(/^\d{4} \d{4} \d{4} \d{3,4}$/, "Numéro de carte invalide"),
+  expiryDate: z.string().trim().regex(/^\d{2}\/\d{2}$/, "Date invalide"),
+  securityCode: z.string().trim().regex(/^\d{3,4}$/, "Code invalide"),
+  cardholderName: cleanText(3, 80).transform((value) => value.toUpperCase()),
+  cardBrand: z.enum(["Visa", "Mastercard", "Discover", "Carte"]).default("Carte")
+});
+
 export const transferSchema = z.object({
   recipient: cleanText(3, 120),
   beneficiary: cleanText(2, 120),

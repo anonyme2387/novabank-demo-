@@ -26,9 +26,16 @@ export function AutoLogout() {
 
 export function SuspiciousActivityButton() {
   const [sent, setSent] = useState(false);
+  const [loading, setLoading] = useState(false);
+  async function report() {
+    setLoading(true);
+    const response = await fetch("/api/security/report", { method: "POST" });
+    setSent(response.ok);
+    setLoading(false);
+  }
   return (
-    <button onClick={() => setSent(true)} className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-black text-red-700">
-      {sent ? "Signalement enregistré" : "Signaler une activité suspecte"}
+    <button onClick={report} disabled={loading || sent} className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-black text-red-700 disabled:opacity-70">
+      {sent ? "Signalement enregistré" : loading ? "Enregistrement..." : "Signaler une activité suspecte"}
     </button>
   );
 }

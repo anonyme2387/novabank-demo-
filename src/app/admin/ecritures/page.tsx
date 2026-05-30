@@ -11,7 +11,7 @@ const debitTypes = new Set(["WITHDRAWAL", "TRANSFER_OUT"]);
 
 export default async function AdminEntriesPage() {
   const admin = await requireAdmin();
-  if (!admin) redirect("/dashboard");
+  if (!admin) redirect("/dashboard?error=admin");
   const transactions = await prisma.transaction.findMany({
     include: { account: { include: { user: true } }, relatedAccount: { include: { user: true } } },
     orderBy: { createdAt: "desc" },

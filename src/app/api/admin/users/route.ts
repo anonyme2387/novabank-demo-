@@ -1,10 +1,10 @@
-import { requireAdmin } from "@/lib/auth";
-import { fail, ok } from "@/lib/api";
+import { ok } from "@/lib/api";
+import { requireAdminApi } from "@/lib/admin-security";
 import { prisma } from "@/lib/prisma";
 
-export async function GET() {
-  const admin = await requireAdmin();
-  if (!admin) return fail("Accès refusé", 403);
+export async function GET(req: Request) {
+  const { response } = await requireAdminApi(req);
+  if (response) return response;
   const users = await prisma.user.findMany({
     orderBy: { createdAt: "desc" },
     include: { account: { include: { card: true } }, loginLogs: { orderBy: { createdAt: "desc" }, take: 1 } }

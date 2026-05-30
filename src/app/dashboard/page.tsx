@@ -9,7 +9,7 @@ import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
-export default async function DashboardPage() {
+export default async function DashboardPage({ searchParams }: { searchParams?: { error?: string } }) {
   const user = await requireUser();
   if (!user?.account) redirect("/connexion");
   const transactions = await prisma.transaction.findMany({ where: { accountId: user.account.id }, orderBy: { createdAt: "desc" }, take: 5 });
@@ -33,6 +33,11 @@ export default async function DashboardPage() {
           </div>
           <div className="rounded-xl bg-white px-5 py-3 text-sm font-semibold text-steel shadow-sm">IBAN: <span className="text-night">{user.account.ibanFake}</span></div>
         </div>
+        {searchParams?.error === "admin" && (
+          <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm font-black text-red-700">
+            Accès refusé. Cette zone est réservée aux administrateurs.
+          </div>
+        )}
         <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_380px]">
           <section className="grid gap-6">
             <div className="premium-panel rounded-2xl p-6">

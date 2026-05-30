@@ -3,9 +3,17 @@ import { cookies } from "next/headers";
 import { NextRequest } from "next/server";
 import { jwtVerify, SignJWT } from "jose";
 import { prisma } from "@/lib/prisma";
+import { logSecurityEvent } from "@/lib/security-log";
 
 const cookieName = "novabank_session";
-const secret = new TextEncoder().encode(process.env.JWT_SECRET ?? "dev-secret-change-me");
+
+function jwtSecret() {
+  const secret = process.env.JWT_SECRET;
+  if (!secret && process.env.NODE_ENV === "production") {
+    throw new Error("JWT_SECRET obligatoire en production");
+  }
+  return new TextEncoder().encode(secret ?? "dev-secret-change-me");
+}
 
 export type SessionUser = {
   id: string;
@@ -17,15 +25,15 @@ export async function createSession(user: SessionUser) {
   const token = await new SignJWT(user)
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
-    .setExpirationTime("7d")
-    .sign(secret);
+    .setExpirationTime("2h")
+    .sign(jwtSecret());
 
   cookies().set(cookieName, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    sameSite: "strict",
     path: "/",
-    maxAge: 60 * 60 * 24 * 7
+    maxAge: 60 * 60 * 2
   });
 }
 
@@ -37,9 +45,18 @@ export async function readSessionFromRequest(req?: NextRequest): Promise<Session
   const token = req ? req.cookies.get(cookieName)?.value : cookies().get(cookieName)?.value;
   if (!token) return null;
   try {
-    const { payload } = await jwtVerify(token, secret);
+    const { payload } = await jwtVerify(token, jwtSecret());
     return { id: String(payload.id), email: String(payload.email), role: payload.role as "USER" | "ADMIN" };
-  } catch {
+  } catch (error) {
+    if (req) {
+      await logSecurityEvent({
+        req,
+        event: "INVALID_TOKEN",
+        level: "HIGH",
+        message: "Jeton JWT invalide ou expiré",
+        metadata: { reason: error instanceof Error ? error.message : "unknown" }
+      });
+    }
     return null;
   }
 }
@@ -54,7 +71,19 @@ export async function requireUser() {
   });
 }
 
-export async function requireAdmin() {
+export async function requireAdmin(req?: Request) {
   const user = await requireUser();
-  return user?.role === "ADMIN" ? user : null;
+  if (!user) return null;
+  if (user.role !== "ADMIN") {
+    await logSecurityEvent({
+      req,
+      userId: user.id,
+      email: user.email,
+      event: "ADMIN_ACCESS_DENIED",
+      level: "HIGH",
+      message: "Tentative d’accès administrateur refusée"
+    });
+    return null;
+  }
+  return user;
 }
